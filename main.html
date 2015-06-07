@@ -18,31 +18,34 @@
             source: new ol.source.MapQuest({layer: 'osm'})
         });
 
-        var extent = [0, 0, 1855, 1036];
-        var extent = [0, 0, 10000000, 10000000];
-        var extent1 = ol.proj.transform([37.8, 54], 'EPSG:4326', 'EPSG:3857');
-        var extent2 = ol.proj.transform([40, 58.7], 'EPSG:4326', 'EPSG:3857');
+        var extent1 = ol.proj.transform([39.4, 54.1], 'EPSG:4326', 'EPSG:3857');
+        var extent2 = ol.proj.transform([40, 58.45], 'EPSG:4326', 'EPSG:3857');
         var extent = [extent1[0], extent1[1], extent2[0], extent2[1]];
-        var projection = new ol.proj.Projection({
-            code: 'xkcd-image',
-            units: 'pixels',
-            extent: extent
-        });          
-        var projection = '';//'EPSG:3857';//osmLayer.getSource().getProjection();
-        var imageLayer = new ol.layer.Image({
+        var imageLayerNN = new ol.layer.Image({
             source: new ol.source.ImageStatic({
-                url: 'http://www.meteorad.ru/data/UVKNizhny.png', 
+                url: 'UVKNizhny-crop.png',
                 imageExtent: extent, 
-                //imageSize: [0,0,1855,1036],
-                //projection: projection
             }),
             opacity: 0.5
          });
+         
+        var extent1 = ol.proj.transform([36.3, 55.7], 'EPSG:4326', 'EPSG:3857');
+        var extent2 = ol.proj.transform([40, 59.95], 'EPSG:4326', 'EPSG:3857');
+        var extent = [extent1[0], extent1[1], extent2[0], extent2[1]];
+        var imageLayerK = new ol.layer.Image({
+            source: new ol.source.ImageStatic({
+                url: 'UVKKostroma-crop.png',
+                imageExtent: extent, 
+            }),
+            opacity: 0.5
+         });
+         
         var map = new ol.Map({
             target: 'map',
             layers: [
-                osmLayer,
-                imageLayer
+                //osmLayer,
+                imageLayerNN,
+                imageLayerK
             ],
 //            view: new ol.View({
 //                center: ol.extent.getCenter(extent),
