@@ -14,22 +14,46 @@
   <body>
     <div id="map" class="map"></div>
     <script type="text/javascript">
-      var map = new ol.Map({
-        target: 'map',
-        layers: [
-//          new ol.layer.Tile({
-//            source: new ol.source.MapQuest({layer: 'osm'})
-//          }),
-          new ol.layer.Image({
-            source: new ol.source.ImageStatic({url:'UVKNizhny.png', imageExtent: [0,0,200,200], imageSize: [200,200] }),
-            imageExtent: [0,0,200,200]
-          })
-        ],
+        var osmLayer = new ol.layer.Tile({
+            source: new ol.source.MapQuest({layer: 'osm'})
+        });
+
+        var extent = [0, 0, 1855, 1036];
+        var extent = [0, 0, 10000000, 10000000];
+        var extent1 = ol.proj.transform([37.8, 54], 'EPSG:4326', 'EPSG:3857');
+        var extent2 = ol.proj.transform([40, 58.7], 'EPSG:4326', 'EPSG:3857');
+        var extent = [extent1[0], extent1[1], extent2[0], extent2[1]];
+        var projection = new ol.proj.Projection({
+            code: 'xkcd-image',
+            units: 'pixels',
+            extent: extent
+        });          
+        var projection = '';//'EPSG:3857';//osmLayer.getSource().getProjection();
+        var imageLayer = new ol.layer.Image({
+            source: new ol.source.ImageStatic({
+                url: 'http://www.meteorad.ru/data/UVKNizhny.png', 
+                imageExtent: extent, 
+                //imageSize: [0,0,1855,1036],
+                //projection: projection
+            }),
+            opacity: 0.5
+         });
+        var map = new ol.Map({
+            target: 'map',
+            layers: [
+                osmLayer,
+                imageLayer
+            ],
+//            view: new ol.View({
+//                center: ol.extent.getCenter(extent),
+//                zoom: 2,
+//                projection: projection
+//            })            
         view: new ol.View({
           center: ol.proj.transform([43+55/60, 56+18/60], 'EPSG:4326', 'EPSG:3857'),
-          zoom: 8
+          zoom: 6
         })
-      });
+        });
     </script>
   </body>
 </html>
