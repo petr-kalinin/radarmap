@@ -28,6 +28,17 @@
             }),
             opacity: 0.5
          });
+
+        var extent1 = ol.proj.transform([39.98, 53.78], 'EPSG:4326', 'EPSG:3857');
+        var extent2 = ol.proj.transform([41, 58.53], 'EPSG:4326', 'EPSG:3857');
+        var extent = [extent1[0], extent1[1], extent2[0], extent2[1]];
+        var imageLayerNNaz = new ol.layer.Image({
+            source: new ol.source.ImageStatic({
+                url: 'NN-azim.png',
+                imageExtent: extent, 
+            }),
+            opacity: 0.5
+         });
          
         var extent1 = ol.proj.transform([36.3, 55.7], 'EPSG:4326', 'EPSG:3857');
         var extent2 = ol.proj.transform([40, 59.95], 'EPSG:4326', 'EPSG:3857');
@@ -39,13 +50,26 @@
             }),
             opacity: 0.5
          });
-         
+
+        var extent1 = ol.proj.transform([35.4, 54.24], 'EPSG:4326', 'EPSG:3857');
+        var extent2 = ol.proj.transform([40, 59.9], 'EPSG:4326', 'EPSG:3857');
+        var extent = [extent1[0], extent1[1], extent2[0], extent2[1]];
+        var imageLayerBlend = new ol.layer.Image({
+            source: new ol.source.ImageStatic({
+                url: 'blend1.jpg',
+                imageExtent: extent, 
+            }),
+            opacity: 0.5
+         });
+
         var map = new ol.Map({
             target: 'map',
             layers: [
-                //osmLayer,
-                imageLayerNN,
-                imageLayerK
+                osmLayer,
+                imageLayerBlend
+                //imageLayerNN,
+                //imageLayerNNaz
+                //imageLayerK
             ],
 //            view: new ol.View({
 //                center: ol.extent.getCenter(extent),
