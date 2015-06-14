@@ -8,7 +8,7 @@ sourceName = 'UVKNizhny-crop.png'
 sourceCenter = (588, 500) # x,y
 sourcePixelPerRad = 12600
 sourcePixelPerDeg = 12600 / 180 * pi
-targetSize = 500 #1500
+targetHeight = 1000 #1500
 targetName = 'UVKNizhny-merc.png'
 #-----------
 
@@ -33,6 +33,7 @@ earthBotRightDeg = (earthCenterDeg[0] + earthRadiusDeg[0], earthCenterDeg[1] + e
 
 targetTopLeft = pyproj.transform(earthProj, targetProj, earthTopLeftDeg[0], earthTopLeftDeg[1])
 targetBotRight = pyproj.transform(earthProj, targetProj, earthBotRightDeg[0], earthBotRightDeg[1])
+targetWidth = int(targetHeight / (targetBotRight[1] - targetTopLeft[1]) * (targetBotRight[0] - targetTopLeft[0]))
 
 print(targetTopLeft)
 print(targetBotRight)
@@ -51,11 +52,13 @@ bbYpx = int(-bb[1] * sourcePixelPerRad + sourceCenter[1])
 print('BB in source: ',bb)
 print('BB in source: ',bbXpx, bbYpx)
 
-target = Image.new('RGBA', (targetSize, targetSize), (0,0,0,1))
-for targetXpx in range(targetSize):
-    for targetYpx in range(targetSize):
-        targetX = targetTopLeft[0] + (targetBotRight[0]-targetTopLeft[0]) * targetXpx / targetSize
-        targetY = targetTopLeft[1] + (targetBotRight[1]-targetTopLeft[1]) * (targetSize - targetYpx) / targetSize
+print('target size', targetWidth, targetHeight)
+
+target = Image.new('RGBA', (targetWidth, targetHeight), (0,0,0,1))
+for targetXpx in range(targetWidth):
+    for targetYpx in range(targetHeight):
+        targetX = targetTopLeft[0] + (targetBotRight[0]-targetTopLeft[0]) * targetXpx / targetWidth
+        targetY = targetTopLeft[1] + (targetBotRight[1]-targetTopLeft[1]) * (targetHeight - targetYpx) / targetHeight
         (sourceX, sourceY) = pyproj.transform(targetProj, sourceProj, targetX, targetY)
         sourceXpx = int(sourceX * sourcePixelPerRad + sourceCenter[0])
         sourceYpx = int(-sourceY * sourcePixelPerRad + sourceCenter[1])
