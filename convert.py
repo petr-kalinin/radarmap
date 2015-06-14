@@ -3,13 +3,19 @@ import pyproj
 from PIL import Image
 from math import cos, pi
 
-earthCenterDeg = (43.97838, 56.293779) #lat, lon
-sourceName = 'UVKNizhny-crop.png'
-sourceCenter = (588, 500) # x,y
+#earthCenterDeg = (43.97838, 56.293779) #lat, lon
+#sourceName = 'UVKNizhny-crop.png'
+#targetName = 'UVKNizhny-merc.png'
+#sourceCenter = (588, 500) # x,y
+
+earthCenterDeg = (41.018314, 57.800917) #lon, lat
+sourceName = 'UVKKostroma-crop.png'
+targetName = 'UVKKostroma-merc.png'
+sourceCenter = (583, 493) # x,y
+
 sourcePixelPerRad = 12600
 sourcePixelPerDeg = 12600 / 180 * pi
-targetHeight = 1000 #1500
-targetName = 'UVKNizhny-merc.png'
+targetHeight = 500 #1500
 #-----------
 
 earthCenterRad = (earthCenterDeg[0] / 180*pi, earthCenterDeg[1] / 180*pi) #lat, lon
@@ -68,3 +74,5 @@ for targetXpx in range(targetWidth):
         pass
         
 target.save(targetName)
+print(targetTopLeft)
+print(targetBotRight)
