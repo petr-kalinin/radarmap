@@ -15,7 +15,7 @@ sourceCenter = (583, 493) # x,y
 
 sourcePixelPerRad = 12600
 sourcePixelPerDeg = 12600 / 180 * pi
-targetHeight = 500 #1500
+targetHeight = 1000 #1500
 #-----------
 
 earthCenterRad = (earthCenterDeg[0] / 180*pi, earthCenterDeg[1] / 180*pi) #lat, lon
