@@ -18,12 +18,14 @@
             source: new ol.source.MapQuest({layer: 'osm'})
         });
 
-        var extent1 = ol.proj.transform([39.4, 54.1], 'EPSG:4326', 'EPSG:3857');
-        var extent2 = ol.proj.transform([40, 58.45], 'EPSG:4326', 'EPSG:3857');
+        //var extent1 = ol.proj.transform([39.4, 54.1], 'EPSG:4326', 'EPSG:3857');
+        //var extent2 = ol.proj.transform([40, 58.45], 'EPSG:4326', 'EPSG:3857');
+        var extent1 = [4358375.824120124, 7191222.148398699]
+        var extent2 = [5432925.910906049, 8068083.313301819]
         var extent = [extent1[0], extent1[1], extent2[0], extent2[1]];
         var imageLayerNN = new ol.layer.Image({
             source: new ol.source.ImageStatic({
-                url: 'UVKNizhny-crop.png',
+                url: 'UVKNizhny-merc.png',
                 imageExtent: extent, 
             }),
             opacity: 0.5
@@ -66,8 +68,8 @@
             target: 'map',
             layers: [
                 osmLayer,
-                imageLayerBlend
-                //imageLayerNN,
+                //imageLayerBlend
+                imageLayerNN,
                 //imageLayerNNaz
                 //imageLayerK
             ],
@@ -77,8 +79,9 @@
 //                projection: projection
 //            })            
         view: new ol.View({
-          center: ol.proj.transform([43+55/60, 56+18/60], 'EPSG:4326', 'EPSG:3857'),
-          zoom: 6
+          //center: ol.proj.transform([43+55/60, 56+18/60], 'EPSG:4326', 'EPSG:3857'),
+          center: [4895650.867513087, 7617122.422797349],
+          zoom: 16
         })
         });
     </script>
