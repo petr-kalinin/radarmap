@@ -8,7 +8,7 @@ from math import cos, pi
 #targetName = 'UVKNizhny-merc.png'
 #sourceCenter = (588, 500) # x,y
 
-earthCenterDeg = (41.018314, 57.800917) #lon, lat
+earthCenterDeg = (40.988059, 57.819504) #lon, lat
 sourceName = 'UVKKostroma-crop.png'
 targetName = 'UVKKostroma-merc.png'
 sourceCenter = (583, 493) # x,y
