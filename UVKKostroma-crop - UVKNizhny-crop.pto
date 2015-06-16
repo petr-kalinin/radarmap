@@ -1,13 +1,13 @@
 # hugin project file
 #hugin_ptoversion 2
-p f5 w1722 h12994 v20  E0 R0 S0,1722,41,1584 n"TIFF_m c:LZW r:CROP"
+p f6 w1722 h1595 v14  E0 R0 S0,1722,0,-4115 n"TIFF_m c:LZW r:CROP"
 m g1 i0 f0 m2 p0.00784314
 
 # image lines
 #-hugin  cropFactor=1
-i w1168 h953 f3 v9.57 Ra0 Rb0 Rc0 Rd0 Re0 Eev0 Er1 Eb1 r-0.967917067894567 p56.0664322120226 y-0.192595488693199 TrX0 TrY0 TrZ0 Tpy0 Tpp0 j0 a0 b0 c0 d0 e0 g0 t0 Va1 Vb0 Vc0 Vd0 Vx0 Vy0  Vm5 n"UVKKostroma-crop.png"
+i w1168 h953 f3 v9.57 Ra0 Rb0 Rc0 Rd0 Re0 Eev0 Er1 Eb1 r-1.79661078433169 p-1.58148312487684 y1.58550518934737 TrX0 TrY0 TrZ0 Tpy0 Tpp0 j0 a0 b0 c0 d0 e0 g0 t0 Va1 Vb0 Vc0 Vd0 Vx0 Vy0  Vm5 n"UVKKostroma-crop.png"
 #-hugin  cropFactor=1
-i w1178 h960 f3 v9.5746135912091 Ra0 Rb0 Rc0 Rd0 Re0 Eev0 Er1 Eb1 r0.655347202634938 p53.3574560409947 y4.87124448950111 TrX0 TrY0 TrZ0 Tpy0 Tpp0 j0 a0 b0 c0 d0 e0 g0 t0 Va1 Vb0 Vc0 Vd0 Vx0 Vy0  Vm5 n"UVKNizhny-crop.png"
+i w1178 h960 f3 v9.5746135912091 Ra0 Rb0 Rc0 Rd0 Re0 Eev0 Er1 Eb1 r-4.461899399844 p-4.13293008540488 y4.65068457328753 TrX0 TrY0 TrZ0 Tpy0 Tpp0 j0 a0 b0 c0 d0 e0 g0 t0 Va1 Vb0 Vc0 Vd0 Vx0 Vy0  Vm5 n"UVKNizhny-crop.png"
 
 
 # specify variables that should be optimized
@@ -46,7 +46,7 @@ c n0 N1 x486 y796 X126 Y455 t0
 c n0 N1 x865.025662496431 y582.955663567289 X515 Y257 t0
 c n0 N1 x567 y446 X222.930341909582 Y107.910256257205 t0
 
-#hugin_optimizeReferenceImage 0
+#hugin_optimizeReferenceImage 1
 #hugin_blender enblend
 #hugin_remapper nona
 #hugin_enblendOptions 
@@ -70,5 +70,5 @@ c n0 N1 x567 y446 X222.930341909582 Y107.910256257205 t0
 #hugin_outputImageTypeHDRCompression LZW
 #hugin_outputStacksMinOverlap 0.7
 #hugin_outputLayersExposureDiff 0.5
-#hugin_optimizerMasterSwitch 1
+#hugin_optimizerMasterSwitch 0
 #hugin_optimizerPhotoMasterSwitch 21
