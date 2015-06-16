@@ -18,8 +18,6 @@
             source: new ol.source.MapQuest({layer: 'osm'})
         });
 
-        //var extent1 = ol.proj.transform([39.4, 54.1], 'EPSG:4326', 'EPSG:3857');
-        //var extent2 = ol.proj.transform([40, 58.45], 'EPSG:4326', 'EPSG:3857');
         var extent1 = [4364696.706983571, 7196099.93438077]
         var extent2 = [5426605.028042602, 8062618.0504191]
         var extent = [extent1[0], extent1[1], extent2[0], extent2[1]];
@@ -31,19 +29,6 @@
             opacity: 0.5
          });
 
-        var extent1 = ol.proj.transform([39.98, 53.78], 'EPSG:4326', 'EPSG:3857');
-        var extent2 = ol.proj.transform([41, 58.53], 'EPSG:4326', 'EPSG:3857');
-        var extent = [extent1[0], extent1[1], extent2[0], extent2[1]];
-        var imageLayerNNaz = new ol.layer.Image({
-            source: new ol.source.ImageStatic({
-                url: 'NN-azim.png',
-                imageExtent: extent, 
-            }),
-            opacity: 0.5
-         });
-         
-        //var extent1 = ol.proj.transform([36.3, 55.7], 'EPSG:4326', 'EPSG:3857');
-        //var extent2 = ol.proj.transform([40, 59.95], 'EPSG:4326', 'EPSG:3857');
         var extent1 = [4017502.552186516, 7492596.015724386]
         var extent2 = [5114261.924068971, 8388732.016104072]
         var extent = [extent1[0], extent1[1], extent2[0], extent2[1]];
@@ -55,31 +40,25 @@
             opacity: 0.5
          });
 
-        var extent1 = ol.proj.transform([35.4, 54.24], 'EPSG:4326', 'EPSG:3857');
-        var extent2 = ol.proj.transform([40, 59.9], 'EPSG:4326', 'EPSG:3857');
+        var extent1 = [3658211.2684835396, 7074804.292184441]
+        var extent2 = [4701661.186943608, 7926050.830921172]
         var extent = [extent1[0], extent1[1], extent2[0], extent2[1]];
-        var imageLayerBlend = new ol.layer.Image({
+        var imageLayerP = new ol.layer.Image({
             source: new ol.source.ImageStatic({
-                url: 'blend1.jpg',
+                url: 'UVKProfsoyuz-merc.png',
                 imageExtent: extent, 
             }),
             opacity: 0.5
          });
-
+         
         var map = new ol.Map({
             target: 'map',
             layers: [
                 osmLayer,
-                //imageLayerBlend
                 imageLayerNN,
-                //imageLayerNNaz
-                imageLayerK
+                imageLayerK,
+                imageLayerP
             ],
-//            view: new ol.View({
-//                center: ol.extent.getCenter(extent),
-//                zoom: 2,
-//                projection: projection
-//            })            
         view: new ol.View({
           //center: ol.proj.transform([43+55/60, 56+18/60], 'EPSG:4326', 'EPSG:3857'),
           center: [4895650.867513087, 7617122.422797349],

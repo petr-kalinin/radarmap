@@ -3,15 +3,20 @@ import pyproj
 from PIL import Image
 from math import cos, pi
 
-earthCenterDeg = (43.97838, 56.293779) #lat, lon
-sourceName = 'UVKNizhny-crop.png'
-targetName = 'UVKNizhny-merc.png'
-sourceCenter = (588, 500) # x,y
+#earthCenterDeg = (43.97838, 56.293779) #lat, lon
+#sourceName = 'UVKNizhny-crop.png'
+#targetName = 'UVKNizhny-merc.png'
+#sourceCenter = (588, 500) # x,y
 
 #earthCenterDeg = (41.016018, 57.809240) #lon, lat
 #sourceName = 'UVKKostroma-crop.png'
 #targetName = 'UVKKostroma-merc.png'
 #sourceCenter = (583, 493) # x,y
+
+earthCenterDeg = (37.549006,55.648246) #lon, lat
+sourceName = 'UVKProfsoyuz-crop.png'
+targetName = 'UVKProfsoyuz-merc.png'
+sourceCenter = (576, 459) # x,y
 
 sourcePixelPerRad = 12750 # was 12600
 sourcePixelPerDeg = sourcePixelPerRad / 180 * pi
