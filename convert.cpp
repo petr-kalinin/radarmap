@@ -1,34 +1,44 @@
-#!/usr/bin/python3
-import pyproj
-from PIL import Image
-from math import cos, pi
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <iostream>
+#include <sstream>
+#include <cmath>
 
-#earthCenterDeg = (43.97838, 56.293779) #lat, lon
-#sourceName = 'UVKNizhny-crop.png'
-#targetName = 'UVKNizhny-merc.png'
-#sourceCenter = (588, 500) # x,y
+using namespace std;
+using namespace cv;
 
-#earthCenterDeg = (41.016018, 57.809240) #lon, lat
-#sourceName = 'UVKKostroma-crop.png'
-#targetName = 'UVKKostroma-merc.png'
-#sourceCenter = (583, 493) # x,y
+int main() {
+    /*
+    #earthCenterDeg = (43.97838, 56.293779) #lat, lon
+    #sourceName = 'UVKNizhny-crop.png'
+    #targetName = 'UVKNizhny-merc.png'
+    #sourceCenter = (588, 500) # x,y
 
-earthCenterDeg = (37.549006,55.648246) #lon, lat
-sourceName = 'UVKProfsoyuz-crop.png'
-targetName = 'UVKProfsoyuz-merc.png'
-sourceCenter = (576, 459) # x,y
+    #earthCenterDeg = (41.016018, 57.809240) #lon, lat
+    #sourceName = 'UVKKostroma-crop.png'
+    #targetName = 'UVKKostroma-merc.png'
+    #sourceCenter = (583, 493) # x,y
+    */
 
-sourcePixelPerRad = 12750 # was 12600
-sourcePixelPerDeg = sourcePixelPerRad / 180 * pi
-targetHeight = 1000 #1500
-#-----------
+    std::pair<float, float> earthCenterDeg {37.549006,55.648246};
+    std::string sourceName = "UVKProfsoyuz-crop.png";
+    std::string targetName = "UVKProfsoyuz-merc.png";
+    std::pair<float, float> sourceCenter {576, 459};
 
-earthCenterRad = (earthCenterDeg[0] / 180*pi, earthCenterDeg[1] / 180*pi) #lat, lon
+    float sourcePixelPerRad = 12750;
+    float sourcePixelPerDeg = sourcePixelPerRad / 180 * M_PI;
+    int targetHeight = 1000;
+    //------------------------
 
-source = Image.open(sourceName)
-sourceSize = source.size
+    std::pair<float, float> earthCenterRad{
+        earthCenterDeg.first / 180*M_PI, 
+        earthCenterDeg.second / 180*M_PI};
 
-earthProj = pyproj.Proj(proj='latlong')
+    Mat_<Vec3b> source = imread(sourceName, CV_LOAD_IMAGE_COLOR);
+    std::pair<int, int> sourceSize {source.rows, source.cols};
+
+/*
+    earthProj = pyproj.Proj(proj='latlong')
 sourceCode = ('+proj=aeqd +R=1 +x_0=0 +y_0=0 +lon_0=%8.5f +lat_0=%8.5f' % earthCenterDeg)
 print(sourceCode)
 sourceProj = pyproj.Proj(sourceCode)
@@ -64,9 +74,11 @@ print('BB in source: ',bb)
 print('BB in source: ',bbXpx, bbYpx)
 
 print('target size', targetWidth, targetHeight)
+*/
+    int targetWidth = targetHeight;
 
-target = Image.new('RGBA', (targetWidth, targetHeight), (0,0,0,1))
-for targetXpx in range(targetWidth):
+    Mat target(targetHeight, targetWidth, CV_8UC4, Vec4b(0,0,0,0));
+/*for targetXpx in range(targetWidth):
     for targetYpx in range(targetHeight):
         targetX = targetTopLeft[0] + (targetBotRight[0]-targetTopLeft[0]) * targetXpx / targetWidth
         targetY = targetTopLeft[1] + (targetBotRight[1]-targetTopLeft[1]) * (targetHeight - targetYpx) / targetHeight
@@ -78,7 +90,13 @@ for targetXpx in range(targetWidth):
         if (sourceXpx >= 0) and (sourceXpx < sourceSize[0]) and (sourceYpx >= 0) and (sourceYpx < sourceSize[1]):
             target.putpixel((targetXpx, targetYpx), source.getpixel((int(sourceXpx), int(sourceYpx))))
         pass
-        
-target.save(targetName)
-print(targetTopLeft)
+  */      
+    vector<int> compression_params;
+    compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+    compression_params.push_back(9);
+    imwrite(targetName, target, compression_params);
+/*print(targetTopLeft)
 print(targetBotRight)
+*/
+    return 0;
+}
