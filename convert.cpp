@@ -1,8 +1,11 @@
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 #include <sstream>
 #include <cmath>
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
+#include <proj_api.h>
 
 using namespace std;
 using namespace cv;
@@ -37,16 +40,29 @@ int main() {
     Mat_<Vec4b> source = imread(sourceName, -1);
     std::pair<int, int> sourceSize {source.rows, source.cols};
 
-/*
-    earthProj = pyproj.Proj(proj='latlong')
-sourceCode = ('+proj=aeqd +R=1 +x_0=0 +y_0=0 +lon_0=%8.5f +lat_0=%8.5f' % earthCenterDeg)
-print(sourceCode)
-sourceProj = pyproj.Proj(sourceCode)
-targetProj = pyproj.Proj(init='epsg:3857')
-#targetProj = pyproj.Proj('+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs')
 
-print('Center@source: ',pyproj.transform(earthProj, sourceProj, earthCenterDeg[0], earthCenterDeg[1]))
-print('Center@target: ',pyproj.transform(earthProj, targetProj, earthCenterDeg[0], earthCenterDeg[1]))
+    projPJ earthProj = pj_init_plus("+proj=latlong");
+    if (!earthProj) {
+        cout << "Can't create earthProj!" << endl;
+        exit(1);
+    }
+    stringstream sourceCode;
+    sourceCode << "+proj=aeqd +R=1 +x_0=0 +y_0=0 +lon_0=" << earthCenterDeg.first << "+lat_0=" << earthCenterDeg.second;
+    projPJ sourceProj = pj_init_plus(sourceCode.str().c_str());
+    if (!sourceProj) {
+        cout << "Can't create sourceProj!" << endl;
+        exit(1);
+    }
+    projPJ targetProj = pj_init_plus("+epsg=3857");
+    if (!targetProj) {
+        cout << "Can't create targetProj!" << endl;
+        exit(1);
+    }
+
+    double x = earthCenterDeg.first, y = earthCenterDeg.second;
+    pj_transform(earthProj, sourceProj, 1, 1, &x, &y, NULL);
+    cout << "Center@source: " << x << " " << y << endl;
+/*print('Center@target: ',pyproj.transform(earthProj, targetProj, earthCenterDeg[0], earthCenterDeg[1]))
 
 earthRadiusDeg = (sourceSize[0]/2 / sourcePixelPerDeg / cos(earthCenterRad[1]), sourceSize[1]/2 / sourcePixelPerDeg)
 earthTopLeftDeg = (earthCenterDeg[0] - earthRadiusDeg[0], earthCenterDeg[1] - earthRadiusDeg[1])
