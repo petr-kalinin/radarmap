@@ -34,7 +34,7 @@ int main() {
         earthCenterDeg.first / 180*M_PI, 
         earthCenterDeg.second / 180*M_PI};
 
-    Mat_<Vec3b> source = imread(sourceName, CV_LOAD_IMAGE_COLOR);
+    Mat_<Vec4b> source = imread(sourceName, -1);
     std::pair<int, int> sourceSize {source.rows, source.cols};
 
 /*
@@ -77,7 +77,14 @@ print('target size', targetWidth, targetHeight)
 */
     int targetWidth = targetHeight;
 
-    Mat target(targetHeight, targetWidth, CV_8UC4, Vec4b(0,0,0,0));
+    Mat_<Vec4b> target(targetHeight, targetWidth, Vec4b(0,0,0,0));
+    for (int targetYpx=0; targetYpx<target.rows; targetYpx++)
+        for (int targetXpx=0; targetXpx<target.cols; targetXpx++) {
+            int sourceXpx = targetXpx * 2;
+            int sourceYpx = targetYpx * 2;
+            if (sourceXpx>=0 && sourceXpx<source.cols && sourceYpx>=0 && sourceYpx<source.rows)
+                target(targetYpx, targetXpx) = source(sourceYpx, sourceXpx);
+        }
 /*for targetXpx in range(targetWidth):
     for targetYpx in range(targetHeight):
         targetX = targetTopLeft[0] + (targetBotRight[0]-targetTopLeft[0]) * targetXpx / targetWidth
