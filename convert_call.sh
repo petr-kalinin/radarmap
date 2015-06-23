@@ -1,0 +1,1 @@
+./convert 37.549006 55.648246 576 459 UVKProfsoyuz-crop.png UVKProfsoyuz-merc.png
