@@ -10,7 +10,23 @@
 using namespace std;
 using namespace cv;
 
-int main() {
+struct point {
+    double x,y;
+    point(double _x, double _y): x(_x), y(_y) {}
+};
+
+ostream& operator<<(ostream& s, point p) {
+    s << p.x << " " << p.y;
+    return s;
+}
+
+point transform(const projPJ& from, const projPJ& to, point xy) {
+    pj_transform(from, to, 1, 1, &xy.x, &xy.y, NULL);
+    return xy;
+}
+
+int main(int argc, char* argv[]) {
+    cout.precision(10);
     /*
     #earthCenterDeg = (43.97838, 56.293779) #lat, lon
     #sourceName = 'UVKNizhny-crop.png'
@@ -21,105 +37,100 @@ int main() {
     #sourceName = 'UVKKostroma-crop.png'
     #targetName = 'UVKKostroma-merc.png'
     #sourceCenter = (583, 493) # x,y
-    */
 
-    std::pair<float, float> earthCenterDeg {37.549006,55.648246};
+    point earthCenterDeg {37.549006,55.648246};
     std::string sourceName = "UVKProfsoyuz-crop.png";
     std::string targetName = "UVKProfsoyuz-merc.png";
-    std::pair<float, float> sourceCenter {576, 459};
+    point sourceCenter {576, 459};
+    */
+    point earthCenterDeg {stof(argv[1]), stof(argv[2])};
+    point sourceCenter {stof(argv[3]), stof(argv[4])};
+    std::string sourceName(argv[5]);
+    std::string targetName(argv[6]);
 
-    float sourcePixelPerRad = 12750;
-    float sourcePixelPerDeg = sourcePixelPerRad / 180 * M_PI;
+    double sourcePixelPerRad = 12750;
     int targetHeight = 1000;
     //------------------------
 
-    std::pair<float, float> earthCenterRad{
-        earthCenterDeg.first / 180*M_PI, 
-        earthCenterDeg.second / 180*M_PI};
+    double sourcePixelPerDeg = sourcePixelPerRad / 180 * M_PI;
+    point earthCenterRad{
+        earthCenterDeg.x / 180*M_PI, 
+        earthCenterDeg.y / 180*M_PI
+    };
 
     Mat_<Vec4b> source = imread(sourceName, -1);
-    std::pair<int, int> sourceSize {source.rows, source.cols};
-
-
+    
     projPJ earthProj = pj_init_plus("+proj=latlong");
     if (!earthProj) {
         cout << "Can't create earthProj!" << endl;
         exit(1);
     }
     stringstream sourceCode;
-    sourceCode << "+proj=aeqd +R=1 +x_0=0 +y_0=0 +lon_0=" << earthCenterDeg.first << "+lat_0=" << earthCenterDeg.second;
+    sourceCode.precision(15);
+    sourceCode << "+proj=aeqd +R=1 +x_0=0 +y_0=0 +lon_0=" << earthCenterDeg.x << " +lat_0=" << earthCenterDeg.y;
     projPJ sourceProj = pj_init_plus(sourceCode.str().c_str());
     if (!sourceProj) {
         cout << "Can't create sourceProj!" << endl;
         exit(1);
     }
-    projPJ targetProj = pj_init_plus("+epsg=3857");
+    projPJ targetProj = pj_init_plus("+init=epsg:3857");
     if (!targetProj) {
         cout << "Can't create targetProj!" << endl;
         exit(1);
     }
 
-    double x = earthCenterDeg.first, y = earthCenterDeg.second;
-    pj_transform(earthProj, sourceProj, 1, 1, &x, &y, NULL);
-    cout << "Center@source: " << x << " " << y << endl;
-/*print('Center@target: ',pyproj.transform(earthProj, targetProj, earthCenterDeg[0], earthCenterDeg[1]))
+    cout << "Center@source: " << transform(earthProj, sourceProj, earthCenterRad) << endl;
+    cout << "Center@target: " << transform(earthProj, targetProj, earthCenterRad) << endl;
 
-earthRadiusDeg = (sourceSize[0]/2 / sourcePixelPerDeg / cos(earthCenterRad[1]), sourceSize[1]/2 / sourcePixelPerDeg)
-earthTopLeftDeg = (earthCenterDeg[0] - earthRadiusDeg[0], earthCenterDeg[1] - earthRadiusDeg[1])
-earthBotRightDeg = (earthCenterDeg[0] + earthRadiusDeg[0], earthCenterDeg[1] + earthRadiusDeg[1])
+    point earthRadiusRad{
+        source.cols/2.0 / sourcePixelPerRad / cos(earthCenterRad.y), 
+        source.rows/2.0 / sourcePixelPerRad
+    };
+    point earthTopLeftRad{
+        earthCenterRad.x - earthRadiusRad.x,
+        earthCenterRad.y - earthRadiusRad.y
+    };
+    point earthBotRightRad{ 
+        earthCenterRad.x + earthRadiusRad.x, 
+        earthCenterRad.y + earthRadiusRad.y
+    };
 
-targetTopLeft = pyproj.transform(earthProj, targetProj, earthTopLeftDeg[0], earthTopLeftDeg[1])
-targetBotRight = pyproj.transform(earthProj, targetProj, earthBotRightDeg[0], earthBotRightDeg[1])
-targetWidth = int(targetHeight / (targetBotRight[1] - targetTopLeft[1]) * (targetBotRight[0] - targetTopLeft[0]))
+    point targetTopLeft = transform(earthProj, targetProj, earthTopLeftRad);
+    point targetBotRight = transform(earthProj, targetProj, earthBotRightRad);
+    int targetWidth = int(targetHeight / (targetBotRight.y - targetTopLeft.y) * (targetBotRight.x - targetTopLeft.x));
 
-print(targetTopLeft)
-print(targetBotRight)
-print(pyproj.transform(targetProj, sourceProj, targetTopLeft[0], targetTopLeft[1]))
-print(pyproj.transform(targetProj, sourceProj, targetBotRight[0], targetBotRight[1]))
-kstr = pyproj.transform(earthProj, sourceProj, 40.93, 57.77)
-kstrXpx = int(kstr[0] * sourcePixelPerRad + sourceCenter[0])
-kstrYpx = int(-kstr[1] * sourcePixelPerRad + sourceCenter[1])
-print('Kostroma in source: ',kstr)
-print('Kostroma in source: ',kstrXpx, kstrYpx)
+    cout << "TargetTopLeft: " << targetTopLeft << endl;
+    cout << "TargetBotRight: " << targetBotRight << endl;
+    
+    cout << "Earth radius: " << earthRadiusRad << endl;
+    cout << "EarthTL: " << earthTopLeftRad << endl;
+    cout << "EarthBR: " << earthBotRightRad << endl;
 
+    cout << "SourceTopLeft: " << transform(targetProj, sourceProj, targetTopLeft) << endl;
+    cout << "SourceBotRight: " << transform(targetProj, sourceProj, targetBotRight) << endl;
 
-bb = pyproj.transform(earthProj, sourceProj, 45.30907, 55.007129)
-bbXpx = int(bb[0] * sourcePixelPerRad + sourceCenter[0])
-bbYpx = int(-bb[1] * sourcePixelPerRad + sourceCenter[1])
-print('BB in source: ',bb)
-print('BB in source: ',bbXpx, bbYpx)
-
-print('target size', targetWidth, targetHeight)
-*/
-    int targetWidth = targetHeight;
+    cout << "target size: " << targetWidth << " " << targetHeight << endl;
 
     Mat_<Vec4b> target(targetHeight, targetWidth, Vec4b(0,0,0,0));
     for (int targetYpx=0; targetYpx<target.rows; targetYpx++)
         for (int targetXpx=0; targetXpx<target.cols; targetXpx++) {
-            int sourceXpx = targetXpx * 2;
-            int sourceYpx = targetYpx * 2;
+            point targetXY {
+                targetTopLeft.x + ((targetBotRight.x-targetTopLeft.x) * targetXpx) / targetWidth,
+                targetTopLeft.y + ((targetBotRight.y-targetTopLeft.y) * (targetHeight-targetYpx)) / targetHeight
+            };
+            point sourceXY = transform(targetProj, sourceProj, targetXY);
+            int sourceXpx = int(sourceXY.x * sourcePixelPerRad + sourceCenter.x);
+            int sourceYpx = int(-sourceXY.y * sourcePixelPerRad + sourceCenter.y);
             if (sourceXpx>=0 && sourceXpx<source.cols && sourceYpx>=0 && sourceYpx<source.rows)
                 target(targetYpx, targetXpx) = source(sourceYpx, sourceXpx);
         }
-/*for targetXpx in range(targetWidth):
-    for targetYpx in range(targetHeight):
-        targetX = targetTopLeft[0] + (targetBotRight[0]-targetTopLeft[0]) * targetXpx / targetWidth
-        targetY = targetTopLeft[1] + (targetBotRight[1]-targetTopLeft[1]) * (targetHeight - targetYpx) / targetHeight
-        (sourceX, sourceY) = pyproj.transform(targetProj, sourceProj, targetX, targetY)
-        sourceXpx = int(sourceX * sourcePixelPerRad + sourceCenter[0])
-        sourceYpx = int(-sourceY * sourcePixelPerRad + sourceCenter[1])
-        if (targetXpx % 128 == 0) and (targetYpx == 100):
-            print(targetXpx, targetYpx)
-        if (sourceXpx >= 0) and (sourceXpx < sourceSize[0]) and (sourceYpx >= 0) and (sourceYpx < sourceSize[1]):
-            target.putpixel((targetXpx, targetYpx), source.getpixel((int(sourceXpx), int(sourceYpx))))
-        pass
-  */      
     vector<int> compression_params;
     compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
     compression_params.push_back(9);
     imwrite(targetName, target, compression_params);
-/*print(targetTopLeft)
-print(targetBotRight)
-*/
+    
+    cout << targetTopLeft << endl;
+    cout << targetBotRight << endl;
+
     return 0;
 }
