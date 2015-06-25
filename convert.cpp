@@ -130,9 +130,14 @@ int main(int argc, char* argv[]) {
 
     double sourcePixelPerRad = 12750;
     int targetHeight = 1000;
+    
+    // Setup a rectangle to define your region of interest
+    Rect cropArea(185, 54, 1365-185, 1014-54);
+
     //------------------------
 
     Image source = imread(sourceName, -1);
+    source = source(cropArea);    
     
     Image result = transformProjection(source, earthCenterDeg, sourceCenter, sourcePixelPerRad, targetHeight);
 
