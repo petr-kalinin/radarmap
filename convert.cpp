@@ -10,13 +10,15 @@
 using namespace std;
 using namespace cv;
 
+typedef Mat_<Vec4b> Image;
+
 struct point {
     double x,y;
     point(double _x, double _y): x(_x), y(_y) {}
 };
 
 ostream& operator<<(ostream& s, point p) {
-    s << p.x << " " << p.y;
+    s << "(" << p.x << " " << p.y << ")";
     return s;
 }
 
@@ -25,40 +27,13 @@ point transform(const projPJ& from, const projPJ& to, point xy) {
     return xy;
 }
 
-int main(int argc, char* argv[]) {
-    cout.precision(10);
-    /*
-    #earthCenterDeg = (43.97838, 56.293779) #lat, lon
-    #sourceName = 'UVKNizhny-crop.png'
-    #targetName = 'UVKNizhny-merc.png'
-    #sourceCenter = (588, 500) # x,y
-
-    #earthCenterDeg = (41.016018, 57.809240) #lon, lat
-    #sourceName = 'UVKKostroma-crop.png'
-    #targetName = 'UVKKostroma-merc.png'
-    #sourceCenter = (583, 493) # x,y
-
-    point earthCenterDeg {37.549006,55.648246};
-    std::string sourceName = "UVKProfsoyuz-crop.png";
-    std::string targetName = "UVKProfsoyuz-merc.png";
-    point sourceCenter {576, 459};
-    */
-    point earthCenterDeg {stof(argv[1]), stof(argv[2])};
-    point sourceCenter {stof(argv[3]), stof(argv[4])};
-    std::string sourceName(argv[5]);
-    std::string targetName(argv[6]);
-
-    double sourcePixelPerRad = 12750;
-    int targetHeight = 1000;
-    //------------------------
-
+Image transformProjection(const Image& source, point earthCenterDeg, point sourceCenter, double sourcePixelPerRad, int targetHeight) {
     double sourcePixelPerDeg = sourcePixelPerRad / 180 * M_PI;
     point earthCenterRad{
         earthCenterDeg.x / 180*M_PI, 
         earthCenterDeg.y / 180*M_PI
     };
 
-    Mat_<Vec4b> source = imread(sourceName, -1);
     
     projPJ earthProj = pj_init_plus("+proj=latlong");
     if (!earthProj) {
@@ -111,7 +86,7 @@ int main(int argc, char* argv[]) {
 
     cout << "target size: " << targetWidth << " " << targetHeight << endl;
 
-    Mat_<Vec4b> target(targetHeight, targetWidth, Vec4b(0,0,0,0));
+    Image target(targetHeight, targetWidth, Vec4b(0,0,0,0));
     for (int targetYpx=0; targetYpx<target.rows; targetYpx++)
         for (int targetXpx=0; targetXpx<target.cols; targetXpx++) {
             point targetXY {
@@ -124,13 +99,47 @@ int main(int argc, char* argv[]) {
             if (sourceXpx>=0 && sourceXpx<source.cols && sourceYpx>=0 && sourceYpx<source.rows)
                 target(targetYpx, targetXpx) = source(sourceYpx, sourceXpx);
         }
+        
+    cout << "Corner-coordinates of result: " << targetTopLeft << " " << targetBotRight << endl;
+
+    return target;
+}
+
+int main(int argc, char* argv[]) {
+    cout.precision(10);
+    /*
+    #earthCenterDeg = (43.97838, 56.293779) #lat, lon
+    #sourceName = 'UVKNizhny-crop.png'
+    #targetName = 'UVKNizhny-merc.png'
+    #sourceCenter = (588, 500) # x,y
+
+    #earthCenterDeg = (41.016018, 57.809240) #lon, lat
+    #sourceName = 'UVKKostroma-crop.png'
+    #targetName = 'UVKKostroma-merc.png'
+    #sourceCenter = (583, 493) # x,y
+
+    point earthCenterDeg {37.549006,55.648246};
+    std::string sourceName = "UVKProfsoyuz-crop.png";
+    std::string targetName = "UVKProfsoyuz-merc.png";
+    point sourceCenter {576, 459};
+    */
+    point earthCenterDeg {stof(argv[1]), stof(argv[2])};
+    point sourceCenter {stof(argv[3]), stof(argv[4])};
+    std::string sourceName(argv[5]);
+    std::string targetName(argv[6]);
+
+    double sourcePixelPerRad = 12750;
+    int targetHeight = 1000;
+    //------------------------
+
+    Image source = imread(sourceName, -1);
+    
+    Image result = transformProjection(source, earthCenterDeg, sourceCenter, sourcePixelPerRad, targetHeight);
+
     vector<int> compression_params;
     compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
     compression_params.push_back(9);
-    imwrite(targetName, target, compression_params);
+    imwrite(targetName, result, compression_params);
     
-    cout << targetTopLeft << endl;
-    cout << targetBotRight << endl;
-
     return 0;
 }
