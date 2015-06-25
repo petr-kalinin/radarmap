@@ -94,12 +94,19 @@ Image transformProjection(const Image& source, point earthCenterDeg, point sourc
                 targetTopLeft.y + ((targetBotRight.y-targetTopLeft.y) * (targetHeight-targetYpx)) / targetHeight
             };
             point sourceXY = transform(targetProj, sourceProj, targetXY);
-            int sourceXpx = int(sourceXY.x * sourcePixelPerRad + sourceCenter.x);
-            int sourceYpx = int(-sourceXY.y * sourcePixelPerRad + sourceCenter.y);
+            int sourceXpx = int(sourceXY.x * sourcePixelPerRad + sourceCenter.x + 0.5);
+            int sourceYpx = int(-sourceXY.y * sourcePixelPerRad + sourceCenter.y + 0.5);
             if (sourceXpx>=0 && sourceXpx<source.cols && sourceYpx>=0 && sourceYpx<source.rows)
                 target(targetYpx, targetXpx) = source(sourceYpx, sourceXpx);
         }
-        
+    
+/*
+    point targetCenter = transform(sourceProj, targetProj, point{0,0});
+    int targetXpx = int((targetCenter.x - targetTopLeft.x)/(targetBotRight.x-targetTopLeft.x)*targetWidth + 0.5);
+    int targetYpx = int((targetBotRight.y-targetCenter.y)/(targetBotRight.y-targetTopLeft.y)*targetHeight + 0.5);
+    cout << "targetCenter: " << targetXpx << " " << targetYpx << endl;
+    target(targetYpx, targetXpx) = Vec4b(255,0,255,255);
+*/        
     cout << "Corner-coordinates of result: " << targetTopLeft << " " << targetBotRight << endl;
 
     return target;
