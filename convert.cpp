@@ -11,6 +11,10 @@ using namespace std;
 using namespace cv;
 
 typedef Mat_<Vec4b> Image;
+Vec4b backgroundOuter(164,160,160,255);
+Vec4b backgroundInner(208,208,208,255);
+Vec4b boundaryColor(128,0,0,255);
+Vec4b transparent(0,0,0,0);
 
 struct point {
     double x,y;
@@ -86,7 +90,7 @@ Image transformProjection(const Image& source, point earthCenterDeg, point sourc
 
     cout << "target size: " << targetWidth << " " << targetHeight << endl;
 
-    Image target(targetHeight, targetWidth, Vec4b(0,0,0,0));
+    Image target(targetHeight, targetWidth, transparent);
     for (int targetYpx=0; targetYpx<target.rows; targetYpx++)
         for (int targetXpx=0; targetXpx<target.cols; targetXpx++) {
             point targetXY {
@@ -96,8 +100,28 @@ Image transformProjection(const Image& source, point earthCenterDeg, point sourc
             point sourceXY = transform(targetProj, sourceProj, targetXY);
             int sourceXpx = int(sourceXY.x * sourcePixelPerRad + sourceCenter.x + 0.5);
             int sourceYpx = int(-sourceXY.y * sourcePixelPerRad + sourceCenter.y + 0.5);
-            if (sourceXpx>=0 && sourceXpx<source.cols && sourceYpx>=0 && sourceYpx<source.rows)
+            if (sourceXpx>=0 && sourceXpx<source.cols && sourceYpx>=0 && sourceYpx<source.rows) {
                 target(targetYpx, targetXpx) = source(sourceYpx, sourceXpx);
+            }
+        }
+    Image targetWoBackground = target.clone();
+    for (int targetYpx=0; targetYpx<target.rows; targetYpx++)
+        for (int targetXpx=0; targetXpx<target.cols; targetXpx++) {
+            Vec4b col = target(targetYpx, targetXpx);
+            if ((col == backgroundOuter)||(col==backgroundInner))
+                targetWoBackground(targetYpx, targetXpx) = transparent;
+            int cntOuter = 0, cntInner=0;
+            for (int dy=-1; dy<=1; dy++) 
+                for (int dx=-1; dx<=1; dx++) {
+                    int cx = targetXpx + dx;
+                    int cy = targetYpx + dy;
+                    if (cx>=0 && cx<target.cols && cy>=0 && cy<target.rows) {
+                        if ((target(cy,cx) == backgroundOuter)||(target(cy,cx)==transparent)) cntOuter++;
+                        if (target(cy,cx) == backgroundInner) cntInner++;
+                    } else cntOuter++;
+                }
+            if ((cntOuter > 0) && (cntInner > 0))
+                targetWoBackground(targetYpx, targetXpx) = boundaryColor;
         }
     
 /*
@@ -105,11 +129,11 @@ Image transformProjection(const Image& source, point earthCenterDeg, point sourc
     int targetXpx = int((targetCenter.x - targetTopLeft.x)/(targetBotRight.x-targetTopLeft.x)*targetWidth + 0.5);
     int targetYpx = int((targetBotRight.y-targetCenter.y)/(targetBotRight.y-targetTopLeft.y)*targetHeight + 0.5);
     cout << "targetCenter: " << targetXpx << " " << targetYpx << endl;
-    target(targetYpx, targetXpx) = Vec4b(255,0,255,255);
+    targetWoBackground(targetYpx, targetXpx) = Vec4b(255,0,255,255);
 */        
     cout << "Corner-coordinates of result: " << targetTopLeft << " " << targetBotRight << endl;
 
-    return target;
+    return targetWoBackground;
 }
 
 std::vector<int> makeCumulative(const std::vector<int>& v) {
