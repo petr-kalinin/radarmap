@@ -5,14 +5,15 @@ import os
 import os.path
 import shutil
 import datetime
+import subprocess
 
-files = [('http://www.meteorad.ru/data/UVKNizhny.png', 'Nizhny'),
-         ('http://www.meteorad.ru/data/UVKKostroma.png', 'Kostroma'),
-         ('http://www.meteorad.ru/data/UVKProfsoyuz.png', 'Moscow')]
+files = [('http://www.meteorad.ru/data/UVKNizhny.png', 'Nizhny', '43.97798', '56.296179'),
+         ('http://www.meteorad.ru/data/UVKKostroma.png', 'Kostroma', '41.017018', '57.800240'),
+         ('http://www.meteorad.ru/data/UVKProfsoyuz.png', 'Moscow', '37.549006', '55.648246')]
 workDir = 'images'
 
 os.chdir(workDir)
-for url, id in files:
+for url, id, a, b in files:
     print("Processing " + id)
     tempFile = id+'-temp.png'
     latestFile = id+'-latest.png'
@@ -24,8 +25,11 @@ for url, id in files:
             print("Hash match, skipping")
             os.remove(tempFile)
             continue
+
     shutil.move(tempFile, latestFile)
+    latestMerc = id+'-merc-latest.png'
+    subprocess.call(["../convert", a, b, latestFile, latestMerc])
     now = datetime.datetime.now(datetime.timezone.utc)
     timeMark = now.strftime('%Y%m%d-%H%M')
-    permFile = id + '-' + timeMark + '.png'
-    shutil.copy(latestFile, permFile)
+    permFile = id + '-merc-' + timeMark + '.png'
+    shutil.copy(latestMerc, permFile)
