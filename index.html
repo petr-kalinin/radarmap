@@ -18,7 +18,8 @@
             collapsible: false
         });
         var osmLayer = new ol.layer.Tile({
-            source: new ol.source.MapQuest({layer: 'osm'})
+            source: new ol.source.MapQuest({layer: 'osm'}),
+            saturation: 0,
         });
 
         var extent1 = [4363717.48, 7196556.306]
@@ -32,7 +33,7 @@
                     new ol.Attribution({
                         html: 'Данные с радаров &copy; <a href="http://meteorad.ru/">ФГБУ «Центральная аэрологическая обсерватория» Росгидромета, «Научно-технический центр по развитию и эксплуатации сети доплеровских метеорологических радиолокаторов» (НТЦР ДМРЛ)</a>'
                     })
-                ]
+                ],
             }),
             opacity: 0.8,
          });
@@ -67,6 +68,7 @@
                 imageLayerK,
                 imageLayerP
             ],
+            renderer: 'webgl',
             controls: ol.control.defaults({ attribution: false }).extend([attribution]),
             view: new ol.View({
             center: [4895650.867513087, 7617122.422797349],
