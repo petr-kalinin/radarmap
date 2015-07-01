@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
         for (int y=0; y<height; y++) {
             bool ok = true;
             for (int j=1; j<sourceN; j++)
-                ok = ok && (norm(source[j](y,x),source[0](y,x))<150);
+                ok = ok && (norm(source[j](y,x),source[0](y,x))<50);
             ok = ok && (source[0](y,x) != boundaryColor);
             if (ok)
                 target(y,x) = source[0](y,x);

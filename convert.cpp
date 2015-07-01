@@ -15,6 +15,7 @@ Vec4b backgroundOuter(164,160,160,255);
 Vec4b backgroundInner(208,208,208,255);
 Vec4b boundaryColor(128,0,0,255);
 Vec4b transparent(0,0,0,0);
+Vec4b black(0,0,0,255);
 vector<Vec4b> palette{ // generated using make_palette
                         {0, 0, 95, 255},
                         {0, 0, 255, 255},
@@ -90,17 +91,31 @@ Vec4b neibColor(const Image& im, int x, int y) {
     return res;
 }
 
-Vec4b replacementColor(const Image& im, int x, int y) {
+bool isKeptBlack(const Image& im, int x, int y, const Image& stencil) {
+    bool hasBlackNear = false;
+    for (int dx=-2; dx<2; dx++) 
+        for (int dy=-2; dy<2; dy++) {
+            int cx = x + dx;
+            int cy = y + dy;
+            if (cx>=0 && cx<stencil.cols && cy>=0 && cy<stencil.rows) {
+                hasBlackNear = hasBlackNear || (stencil(cy, cx) == black);
+            }
+        }
+    
+    return (im(y,x) == black) && (!hasBlackNear);
+}
+
+Vec4b replacementColor(const Image& im, int x, int y, const Image& stencil) {
     if (boundaryPoint(im, x, y)) 
         return boundaryColor;
 
-    if (!isPaletteColor(im(y,x)))
+    if ((!isPaletteColor(im(y,x))) && (!isKeptBlack(im, x, y, stencil)))
         return neibColor(im, x, y);
     
     return im(y,x);
 }
 
-Image transformProjection(const Image& source, point earthCenterDeg, point sourceCenter, double sourcePixelPerRad, int targetHeight) {
+Image transformProjection(const Image& source, point earthCenterDeg, point sourceCenter, double sourcePixelPerRad, int targetHeight, const Image& stencil) {
     double sourcePixelPerDeg = sourcePixelPerRad / 180 * M_PI;
     point earthCenterRad{
         earthCenterDeg.x / 180*M_PI, 
@@ -176,7 +191,7 @@ Image transformProjection(const Image& source, point earthCenterDeg, point sourc
     Image targetWoBackground = target.clone();
     for (int targetYpx=0; targetYpx<target.rows; targetYpx++)
         for (int targetXpx=0; targetXpx<target.cols; targetXpx++) {
-            targetWoBackground(targetYpx, targetXpx) = replacementColor(target, targetXpx, targetYpx);
+            targetWoBackground(targetYpx, targetXpx) = replacementColor(target, targetXpx, targetYpx, stencil);
         }
     
 /*
@@ -262,6 +277,7 @@ int main(int argc, char* argv[]) {
     point earthCenterDeg {stof(argv[1]), stof(argv[2])};
     std::string sourceName(argv[3]);
     std::string targetName(argv[4]);
+    std::string stencilName(argv[5]);
 
     double sourcePixelPerRad = 12750;
     int targetHeight = 1000;
@@ -273,14 +289,18 @@ int main(int argc, char* argv[]) {
     Image source = imread(sourceName, -1);
     source = source(cropArea);
     
+    Image stencil = imread(stencilName, -1);
+    
     point sourceCenter = detectCenter(source);
     
-    Image result = transformProjection(source, earthCenterDeg, sourceCenter, sourcePixelPerRad, targetHeight);
+    Image result = transformProjection(source, earthCenterDeg, sourceCenter, sourcePixelPerRad, targetHeight, stencil);
 
     vector<int> compression_params;
     compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
     compression_params.push_back(9);
     imwrite(targetName, result, compression_params);
+    
+    cout << "Wrote to " << targetName << endl;
     
     return 0;
 }

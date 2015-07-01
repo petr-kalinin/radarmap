@@ -28,7 +28,8 @@ for url, id, a, b in files:
 
     shutil.move(tempFile, latestFile)
     latestMerc = id+'-merc-latest.png'
-    subprocess.call(["../convert", a, b, latestFile, latestMerc])
+    stencil = '../stencil/' + id + '-stencil.png'
+    subprocess.call(["../convert", a, b, latestFile, latestMerc, stencil])
     now = datetime.datetime.now(datetime.timezone.utc)
     timeMark = now.strftime('%Y%m%d-%H%M')
     permFile = id + '-merc-' + timeMark + '.png'
