@@ -15,6 +15,27 @@ Vec4b backgroundOuter(164,160,160,255);
 Vec4b backgroundInner(208,208,208,255);
 Vec4b boundaryColor(128,0,0,255);
 Vec4b transparent(0,0,0,0);
+vector<Vec4b> palette{ // generated using make_palette
+                        {0, 0, 95, 255},
+                        {0, 0, 255, 255},
+                        {0, 68, 136, 255},
+                        {0, 102, 204, 255},
+                        {0, 152, 0, 255},
+                        {90, 194, 0, 255},
+                        {95, 63, 63, 255},
+                        {116, 0, 0, 255},
+                        {127, 85, 255, 255},
+                        {127, 170, 255, 255},
+                        {128, 255, 255, 255},
+                        {147, 255, 70, 255},
+                        {177, 170, 156, 255},
+                        {199, 0, 199, 255},
+                        {255, 56, 1, 255},
+                        {255, 85, 255, 255},
+                        {255, 136, 62, 255},
+                        {255, 170, 255, 255},
+                        {255, 198, 162, 255}};
+
 
 struct point {
     double x,y;
@@ -29,6 +50,54 @@ ostream& operator<<(ostream& s, point p) {
 point transform(const projPJ& from, const projPJ& to, point xy) {
     pj_transform(from, to, 1, 1, &xy.x, &xy.y, NULL);
     return xy;
+}
+
+bool boundaryPoint(const Image& im, int x, int y) {
+    int cntOuter = 0, cntInner=0;
+    for (int dy=-1; dy<=1; dy++) 
+        for (int dx=-1; dx<=1; dx++) {
+            int cx = x + dx;
+            int cy = y + dy;
+            if (cx>=0 && cx<im.cols && cy>=0 && cy<im.rows) {
+                if ((im(cy,cx) == backgroundOuter)||(im(cy,cx)==transparent)) cntOuter++;
+                if (im(cy,cx) == backgroundInner) cntInner++;
+            } else cntOuter++;
+        }
+    return ((cntOuter > 0) && (cntInner > 0));
+}
+
+bool isPaletteColor(const Vec4b& col) {
+    bool paletteColor = false;
+    for(const auto& p: palette) 
+        paletteColor = paletteColor || (p == col);
+    return paletteColor;
+}
+
+Vec4b neibColor(const Image& im, int x, int y) {
+    Vec4b res = transparent;
+    int mindist = 10;
+    for (int dx=-2; dx<2; dx++) 
+        for (int dy=-2; dy<2; dy++) {
+            int cx = x + dx;
+            int cy = y + dy;
+            if (cx>=0 && cx<im.cols && cy>=0 && cy<im.rows) {
+                if (isPaletteColor(im(cy,cx)) && (abs(dx)+abs(dy)<mindist)) {
+                    mindist = abs(dx)+abs(dy);
+                    res = im(cy,cx);
+                }
+            }
+        }
+    return res;
+}
+
+Vec4b replacementColor(const Image& im, int x, int y) {
+    if (boundaryPoint(im, x, y)) 
+        return boundaryColor;
+
+    if (!isPaletteColor(im(y,x)))
+        return neibColor(im, x, y);
+    
+    return im(y,x);
 }
 
 Image transformProjection(const Image& source, point earthCenterDeg, point sourceCenter, double sourcePixelPerRad, int targetHeight) {
@@ -107,21 +176,7 @@ Image transformProjection(const Image& source, point earthCenterDeg, point sourc
     Image targetWoBackground = target.clone();
     for (int targetYpx=0; targetYpx<target.rows; targetYpx++)
         for (int targetXpx=0; targetXpx<target.cols; targetXpx++) {
-            Vec4b col = target(targetYpx, targetXpx);
-            if ((col == backgroundOuter)||(col==backgroundInner))
-                targetWoBackground(targetYpx, targetXpx) = transparent;
-            int cntOuter = 0, cntInner=0;
-            for (int dy=-1; dy<=1; dy++) 
-                for (int dx=-1; dx<=1; dx++) {
-                    int cx = targetXpx + dx;
-                    int cy = targetYpx + dy;
-                    if (cx>=0 && cx<target.cols && cy>=0 && cy<target.rows) {
-                        if ((target(cy,cx) == backgroundOuter)||(target(cy,cx)==transparent)) cntOuter++;
-                        if (target(cy,cx) == backgroundInner) cntInner++;
-                    } else cntOuter++;
-                }
-            if ((cntOuter > 0) && (cntInner > 0))
-                targetWoBackground(targetYpx, targetXpx) = boundaryColor;
+            targetWoBackground(targetYpx, targetXpx) = replacementColor(target, targetXpx, targetYpx);
         }
     
 /*
