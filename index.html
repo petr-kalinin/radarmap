@@ -5,13 +5,24 @@
     <link rel="stylesheet" href="http://openlayers.org/en/v3.5.0/css/ol.css" type="text/css">
     <style>
       #map {
-        height: 100%;
-        width: 100%;
+        //height: 100%;
+        //width: 100%;
+        position:absolute;
+        left: 0px;
+        right:0px;
+        top: 0px;
+        bottom:0px;
       }
       #legend {
         position: absolute;
         right: 10px;
         top: 10px;
+      }
+      .ol-attribution.ol-uncollapsible {
+        height: auto;
+      }
+      .ol-attribution.ol-uncollapsible ul li {
+        display: block;
       }
     </style>
     <script src="http://openlayers.org/en/v3.5.0/build/ol.js" type="text/javascript"></script>
@@ -24,23 +35,17 @@
         var attribution = new ol.control.Attribution({
             collapsible: false
         });
-        var osmLayer = new ol.layer.Tile({
-            source: new ol.source.MapQuest({layer: 'osm'}),
-            saturation: 0,
-        });
-        var cartoDBnoLabelsLayer = new ol.layer.Tile({
+        var mapQuestSource = new ol.source.MapQuest({
+                layer: 'osm',
+            });
+        var osmLayer = new ol.layer.Tile({source: mapQuestSource});
+        /*var osmLayer = new ol.layer.Tile({
             source: new ol.source.XYZ({
-                //url: 'http://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png',
-                url: 'http://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
-                attributions: [new ol.Attribution({ html: ['&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'] })]
+                //url: 'http://ingreelab.net/C04AF0B62BEC112E8D7242FB848631D12D252728/{z}/{x}/{y}.png',
+                url: 'tiles.php?z={z}&x={x}&y={y}',
+                attributions: [new ol.Attribution({ html: ['Данные карты &copy; участники <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, изображения &copy; <a href="http://чепецк.net">Чепецк.net</a>'] })]
             })
-        });
-        var HyddaRoadAndLabels = new ol.layer.Tile({
-            source: new ol.source.XYZ({
-                url: 'http://{s}.tile.openstreetmap.se/hydda/roads_and_labels/{z}/{x}/{y}.png',
-                attributions: [new ol.Attribution({ html: ['Tiles courtesy of <a href="http://openstreetmap.se/" target="_blank">OpenStreetMap Sweden</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'] })]
-            })
-        });
+        });*/
         // other possibilities:
         // - opemapsurfer, has B&W
         // - CartoDB.PositronNoLabels, Hydda.RoadsAndLabels
@@ -54,7 +59,7 @@
                 imageExtent: extent, 
                 attributions: [
                     new ol.Attribution({
-                        html: 'Данные с радаров &copy; <a href="http://meteorad.ru/">ФГБУ «Центральная аэрологическая обсерватория» Росгидромета, «Научно-технический центр по развитию и эксплуатации сети доплеровских метеорологических радиолокаторов» (НТЦР ДМРЛ)</a>'
+                        html: 'Данные с радаров &copy; <a href="http://meteorad.ru/">ФГБУ «Центральная аэрологическая обсерватория» Росгидромета, НТЦР ДМРЛ</a>'
                     })
                 ],
             }),
