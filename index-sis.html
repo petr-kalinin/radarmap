@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="60" />
+    <link rel="stylesheet" href="http://openlayers.org/en/v3.5.0/css/ol.css" type="text/css">
+    <style>
+      #map {
+        //height: 100%;
+        //width: 100%;
+        position:absolute;
+        left: 0px;
+        right:0px;
+        top: 0px;
+        bottom:0px;
+      }
+      #legend {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+      }
+      .ol-attribution.ol-uncollapsible {
+        height: auto;
+      }
+      .ol-attribution.ol-uncollapsible ul li {
+        display: block;
+      }
+    </style>
+    <script src="http://openlayers.org/en/v3.5.0/build/ol.js" type="text/javascript"></script>
+    <title>Карта радаров</title>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="legend"><img src="legend.png"/></div>
+    <script type="text/javascript">
+        var iconFeature = new ol.Feature({
+            geometry: new ol.geom.Point(ol.proj.transform([41.711912, 57.857448], 'EPSG:4326', 'EPSG:3857'))
+        });
+
+        var iconStyle = new ol.style.Style({
+            image: new ol.style.Icon(/** @type {olx.style.IconOptions} */ ({
+                opacity: 0.75,
+                src: 'plus.png'
+            }))
+        });
+
+        iconFeature.setStyle(iconStyle);
+
+        var vectorSource = new ol.source.Vector({
+        features: [iconFeature]
+        });
+
+        var vectorLayer = new ol.layer.Vector({
+        source: vectorSource
+        });
+    
+    
+        var attribution = new ol.control.Attribution({
+            collapsible: false
+        });
+        //var mapQuestSource = new ol.source.MapQuest({
+        //        layer: 'osm',
+        //    });
+        //var osmLayer = new ol.layer.Tile({source: mapQuestSource});
+        var osmLayer = new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                //url: 'http://ingreelab.net/C04AF0B62BEC112E8D7242FB848631D12D252728/{z}/{x}/{y}.png',
+                url: 'tiles.php?z={z}&x={x}&y={y}',
+                attributions: [new ol.Attribution({ html: ['Данные карты &copy; участники <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, ODbL; изображения &copy; <a href="http://чепецк.net">Чепецк.net</a>'] })]
+            })
+        });
+        // other possibilities:
+        // - opemapsurfer, has B&W
+        // - CartoDB.PositronNoLabels, Hydda.RoadsAndLabels
+
+        var extent1 = [4363717.48, 7196556.306]
+        var extent2 = [5427495.549, 8063129.045]
+        var extent = [extent1[0], extent1[1], extent2[0], extent2[1]];
+        var imageLayerNN = new ol.layer.Image({
+            source: new ol.source.ImageStatic({
+                url: 'images/Nizhny-merc-latest.png',
+                imageExtent: extent, 
+                attributions: [
+                    new ol.Attribution({
+                        html: 'Данные с радаров &copy; <a href="http://meteorad.ru/">ФГБУ «ЦАО» Росгидромета, НТЦР ДМРЛ</a>'
+                    }),
+                    new ol.Attribution({
+                        html: 'Сборка всего на одну карту &copy; <a href="mailto:petr@kalinin.nnov.ru">Петр Калинин</a>, <a href="http://www.gnu.org/licenses/agpl-3.0.en.html">AGPL</a>'
+                    })
+                ],
+            }),
+            opacity: 0.8,
+         });
+
+        var extent1 = [4012117.97, 7487716.629]
+        var extent2 = [5119869.004, 8390227.806]
+        var extent = [extent1[0], extent1[1], extent2[0], extent2[1]];
+        var imageLayerK = new ol.layer.Image({
+            source: new ol.source.ImageStatic({
+                url: 'images/Kostroma-merc-latest.png',
+                imageExtent: extent, 
+            }),
+            opacity: 0.8
+         });
+
+        var extent1 = [3656881.616, 7074384.011]
+        var extent2 = [4702991.155, 7926520.428]
+        var extent = [extent1[0], extent1[1], extent2[0], extent2[1]];
+        var imageLayerP = new ol.layer.Image({
+            source: new ol.source.ImageStatic({
+                url: 'images/Moscow-merc-latest.png',
+                imageExtent: extent, 
+            }),
+            opacity: 0.8
+         });
+         
+        var map = new ol.Map({
+            target: 'map',
+            layers: [
+                osmLayer,
+                imageLayerNN,
+                imageLayerK,
+                imageLayerP,
+                vectorLayer
+            ],
+            //renderer: 'webgl',
+            controls: ol.control.defaults({ attribution: false }).extend([attribution]),
+            view: new ol.View({
+            center: ol.proj.transform([41.711912, 57.857448], 'EPSG:4326', 'EPSG:3857'),
+            zoom: 7
+            })
+        });
+    </script>
+  </body>
+</html>
