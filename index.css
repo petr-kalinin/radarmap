@@ -1,0 +1,18 @@
+#map {
+    position:absolute;
+    left: 0px;
+    right:0px;
+    top: 0px;
+    bottom:0px;
+}
+#legend {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+.ol-attribution.ol-uncollapsible {
+    height: auto;
+}
+.ol-attribution.ol-uncollapsible ul li {
+    display: block;
+}
