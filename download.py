@@ -6,11 +6,13 @@ import os.path
 import shutil
 import datetime
 import subprocess
+import json
 
 files = [('http://www.meteorad.ru/data/UVKNizhny.png', 'Nizhny', '43.97798', '56.296179'),
          ('http://www.meteorad.ru/data/UVKKostroma.png', 'Kostroma', '41.017018', '57.800240'),
          ('http://www.meteorad.ru/data/UVKProfsoyuz.png', 'Moscow', '37.549006', '55.648246')]
 workDir = 'images'
+imagesFileName = '../images.json'
 
 os.chdir(workDir)
 for url, id, a, b in files:
@@ -34,3 +36,11 @@ for url, id, a, b in files:
     timeMark = now.strftime('%Y%m%d-%H%M')
     permFile = id + '-merc-' + timeMark + '.png'
     shutil.copy(latestMerc, permFile)
+    with open(imagesFileName) as imagesFile:    
+        images = json.load(imagesFile)
+    if (not (id in images.keys())):
+        images[id]=[]
+    images[id].insert(0, timeMark)
+    with open(imagesFileName,'w') as imagesFile:    
+        json.dump(images, imagesFile)
+    
