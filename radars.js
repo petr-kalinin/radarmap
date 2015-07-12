@@ -4,6 +4,7 @@ var timeout;
 var data;
 var currentFrame;
 var frameHistory;
+var imageCache = [];
 
 function init() {
     var attribution = new ol.control.Attribution({
@@ -56,8 +57,12 @@ function processRequest(xmlhttp) {
     }
 }
 
+function imageUrl(layerId, fname) {
+    return "images/" + layerId + "-merc-" + fname + ".png";
+}
+
 function setLayerSource(layerId, fname) {
-    var url = "images/" + layerId + "-merc-" + fname + ".png";
+    var url = imageUrl(layerId, fname)
     console.log("Set layer source " + layerId + " to " + fname)
     var extent = data[layerId]["corners"];
     var source = new ol.source.ImageStatic({
@@ -104,6 +109,20 @@ function parseTimeFromNow(timeStr) {
     return diff;
 }
 
+function preloadImage(url) {
+    var img = new Image();
+    img.onload = function() {
+        var index = imageCache.indexOf(this);
+        if (index !== -1) {
+            // remove image from the array once it's loaded
+            // for memory consumption reasons
+            imageCache.splice(index, 1);
+        }
+    }
+    imageCache.push(img);
+    img.src = url;
+}
+
 function prepareHistory() {
     var timeInterval = 6*60 // minutes
     var frameHistory = []
@@ -119,6 +138,7 @@ function prepareHistory() {
                 if (time > 0) {
                     frame = Math.floor(time / playSpeed)
                     frameHistory[frame][id] = timeStr;
+                    preloadImage(imageUrl(id, timeStr));
                 }
             }
         }
