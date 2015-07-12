@@ -8,11 +8,19 @@
 #legend {
     position: absolute;
     right: 10px;
-    top: 10px;
+    top: 4ex;
 }
 .ol-attribution.ol-uncollapsible {
     height: auto;
 }
 .ol-attribution.ol-uncollapsible ul li {
     display: block;
+}
+#playback {
+    position:absolute;
+    top:0.5ex;
+    right:10px;
+}
+#timeFrame{
+    display:inline;
 }

@@ -1,5 +1,9 @@
 var map;
 var layers = {};
+var timeout;
+var data;
+var currentFrame;
+var frameHistory;
 
 function init() {
     var attribution = new ol.control.Attribution({
@@ -52,25 +56,30 @@ function processRequest(xmlhttp) {
     }
 }
 
+function setLayerSource(layerId, fname) {
+    var url = "images/" + layerId + "-merc-" + fname + ".png";
+    console.log("Set layer source " + layerId + " to " + fname)
+    var extent = data[layerId]["corners"];
+    var source = new ol.source.ImageStatic({
+                url: url,
+                imageExtent: extent
+            });
+    if (!layers[layerId]) {
+        layers[layerId] = new ol.layer.Image({
+            source: source,
+            opacity: 0.65,
+        });
+        map.addLayer(layers[layerId]);
+    } else {
+        layers[layerId].setSource(source);
+    }
+}
+
 function addLayers(json) {
-    for (var id in json) {
-        if (json.hasOwnProperty(id)) { 
-            var url = "images/" + id + "-merc-" + json[id]["images"][0] + ".png";
-            var extent = json[id]["corners"];
-            var source = new ol.source.ImageStatic({
-                        url: url,
-                        imageExtent: extent
-                    });
-            if (!layers[id]) {
-                layers[id] = new ol.layer.Image({
-                    source: source,
-                    opacity: 0.65,
-                });
-                map.addLayer(layers[id]);
-            } else {
-                console.log("Set layer " + id + " to " + url);
-                layers[id].setSource(source);
-            }
+    data = json;
+    for (var id in data) {
+        if (data.hasOwnProperty(id)) { 
+            setLayerSource(id, data[id]["images"][0]);
         }
     }
 }
@@ -80,5 +89,62 @@ function reload() {
     xmlhttp.onreadystatechange = function () { processRequest(xmlhttp); }
     xmlhttp.open("GET", "images.json", true);
     xmlhttp.send();
-    setTimeout(reload, 10000);
+    timeout = setTimeout(reload, 10000);
+}
+
+function parseTimeFromNow(timeStr) {
+    var y = timeStr[0] + timeStr[1] + timeStr[2] + timeStr[3];
+    var m = timeStr[4] + timeStr[5] -1;
+    var d = timeStr[6] + timeStr[7];
+    var h = timeStr[9] + timeStr[10];
+    var min = timeStr[11] + timeStr[12];
+    var date = new Date(y,m,d,h,min,0,0);
+    var now = new Date();
+    var diff = Math.floor((now-date)/60/1000) + now.getTimezoneOffset();
+    return diff;
+}
+
+function prepareHistory() {
+    var timeInterval = 6*60 // minutes
+    var frameHistory = []
+    var playSpeed = 10 // play minutes per frame
+    for (var i=0; i<=Math.floor(timeInterval/playSpeed); i++) {
+        frameHistory.push({})
+    }
+    for (var id in data) {
+        if (data.hasOwnProperty(id)) { 
+            for(var timeId in data[id]["images"]) {
+                timeStr = data[id]["images"][timeId]
+                time = timeInterval - parseTimeFromNow(timeStr) 
+                if (time > 0) {
+                    frame = Math.floor(time / playSpeed)
+                    frameHistory[frame][id] = timeStr;
+                }
+            }
+        }
+    }
+    return frameHistory;
+}
+
+function playHistory() {
+    clearTimeout(timeout);
+    frameHistory = prepareHistory();
+    console.log(frameHistory);
+    currentFrame = 0
+    stepFrame();
+}
+
+function stepFrame() {
+    if (currentFrame >= frameHistory.length) {
+        document.getElementById("timeFrame").innerHTML = "";
+        reload();
+        return;
+    }
+    console.log(currentFrame)
+    document.getElementById("timeFrame").innerHTML = (6*60 - currentFrame * 10) + " минут назад";
+    for (var id in frameHistory[currentFrame])
+        if (frameHistory[currentFrame].hasOwnProperty(id)) 
+            setLayerSource(id, frameHistory[currentFrame][id])
+    currentFrame++
+    timeout = setTimeout(stepFrame, 500);
 }
