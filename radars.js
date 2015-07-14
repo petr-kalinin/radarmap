@@ -76,6 +76,8 @@ function setLayerSource(layerId, fname) {
             opacity: 0.65,
         });
         map.addLayer(layers[layerId]);
+        if (map.onNewRadarLayer)
+            map.onNewRadarLayer()
     } else {
         layers[layerId].setSource(source);
     }
