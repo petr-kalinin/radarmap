@@ -5,6 +5,7 @@ var data;
 var currentFrame;
 var frameHistory;
 var imageCache = [];
+var cacheStartSize;
 
 function init() {
     var attribution = new ol.control.Attribution({
@@ -143,15 +144,25 @@ function prepareHistory() {
             }
         }
     }
+    cacheStartSize = imageCache.length
     return frameHistory;
+}
+
+function waitForHistory() {
+    if (imageCache.length == 0) {
+        stepFrame()
+        return
+    }
+    var loaded = cacheStartSize - imageCache.length
+    document.getElementById("timeFrame").innerHTML = "Загрузка " + loaded + " / " + cacheStartSize;
+    setTimeout(waitForHistory, 500)
 }
 
 function playHistory() {
     clearTimeout(timeout);
     frameHistory = prepareHistory();
-    console.log(frameHistory);
     currentFrame = 0
-    stepFrame();
+    setTimeout(waitForHistory, 500)
 }
 
 function stepFrame() {
