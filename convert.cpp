@@ -1,3 +1,4 @@
+// (c) Petr Kalinin, https://github.com/petr-kalinin/radarmap, GNU AGPL
 #include <iostream>
 #include <sstream>
 #include <cmath>

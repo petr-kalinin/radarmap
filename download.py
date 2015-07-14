@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# (c) Petr Kalinin, https://github.com/petr-kalinin/radarmap, GNU AGPL
 import urllib.request
 import hashlib
 import os

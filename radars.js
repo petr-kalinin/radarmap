@@ -1,3 +1,5 @@
+// (c) Petr Kalinin, https://github.com/petr-kalinin/radarmap, GNU AGPL
+
 var map;
 var layers = {};
 var timeout;
@@ -25,7 +27,7 @@ function init() {
                     html: 'Данные с радаров &copy; <a href="http://meteorad.ru/">ФГБУ «ЦАО» Росгидромета, НТЦР ДМРЛ</a>'
                 }),
                 new ol.Attribution({
-                    html: 'Сборка всего на одну карту &copy; <a href="mailto:petr@kalinin.nnov.ru">Петр Калинин</a>, <a href="http://www.gnu.org/licenses/agpl-3.0.en.html">AGPL</a>'
+                    html: 'Сборка всего на одну карту &copy; <a href="mailto:petr@kalinin.nnov.ru">Петр Калинин</a>, <a href="http://www.gnu.org/licenses/agpl-3.0.en.html">AGPL</a>, <a href="https://github.com/petr-kalinin/radarmap">github.com/petr-kalinin/radarmap</a>'
                 })
             ]
         })
