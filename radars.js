@@ -66,7 +66,7 @@ function imageUrl(layerId, fname) {
 
 function setLayerSource(layerId, fname) {
     var url = imageUrl(layerId, fname)
-    console.log("Set layer source " + layerId + " to " + fname)
+    //console.log("Set layer source " + layerId + " to " + fname)
     var extent = data[layerId]["corners"];
     var source = new ol.source.ImageStatic({
                 url: url,
@@ -169,14 +169,22 @@ function playHistory() {
     setTimeout(waitForHistory, 500)
 }
 
+function makeTime(delta) {
+    var time = new Date(new Date() - delta * 60 * 1000);
+    var min = time.getMinutes();
+    var hr = time.getHours();
+    min = ((min < 10)? ("0" + min) : ("" + min))
+    hr = ((hr < 10)? ("0" + hr) : ("" + hr))
+    return hr + ":" + min + " (" + delta + " минут назад)";
+}
+
 function stepFrame() {
     if (currentFrame >= frameHistory.length) {
         document.getElementById("timeFrame").innerHTML = "";
         reload();
         return;
     }
-    console.log(currentFrame)
-    document.getElementById("timeFrame").innerHTML = (6*60 - currentFrame * 10) + " минут назад";
+    document.getElementById("timeFrame").innerHTML = makeTime(6*60 - currentFrame * 10);
     for (var id in frameHistory[currentFrame])
         if (frameHistory[currentFrame].hasOwnProperty(id)) 
             setLayerSource(id, frameHistory[currentFrame][id])
