@@ -1,3 +1,6 @@
+body {
+    font-family: Ubuntu Light, Calibri, Arial;
+}
 #map {
     position:absolute;
     left: 0px;
