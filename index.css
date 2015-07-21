@@ -24,4 +24,9 @@
 }
 #timeFrame{
     display:inline;
+    padding-left: 5px;
+}
+#timeFrame:empty{
+    display:inline;
+    padding-left: 0px;
 }
