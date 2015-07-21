@@ -164,6 +164,7 @@ function waitForHistory() {
 
 function playHistory() {
     clearTimeout(timeout);
+    document.getElementById("playbackButton").disabled = true;
     frameHistory = prepareHistory();
     currentFrame = 0
     setTimeout(waitForHistory, 500)
@@ -180,7 +181,8 @@ function makeTime(delta) {
 
 function stepFrame() {
     if (currentFrame >= frameHistory.length) {
-        document.getElementById("timeFrame").innerHTML = "";
+        document.getElementById("timeFrame").innerHTML = "История: ";
+        document.getElementById("playbackButton").disabled = false;
         reload();
         return;
     }
