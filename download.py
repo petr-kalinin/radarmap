@@ -10,7 +10,7 @@ import subprocess
 import json
 import re
 
-files = [('http://www.meteorad.ru/data/UVKNizhny.png', 'Nizhny', '43.97798', '56.296179'),
+files = [('http://www.meteorad.ru/data/UVKNizhnyNovgorod.png', 'Nizhny', '43.97798', '56.296179'),
          ('http://www.meteorad.ru/data/UVKKostroma.png', 'Kostroma', '41.017018', '57.800240'),
          ('http://www.meteorad.ru/data/UVKProfsoyuz.png', 'Moscow', '37.549006', '55.648246')]
 workDir = 'images'
@@ -27,6 +27,7 @@ for url, id, a, b in files:
     print("Processing " + id)
     tempFile = id+'-temp.png'
     latestFile = id+'-latest.png'
+    pre32file = id+'-temp-pre32.png'
     urllib.request.urlretrieve(url, tempFile)
     if (os.path.isfile(latestFile)):
         hashNew = hashlib.sha256(open(tempFile, 'rb').read()).digest()
@@ -36,10 +37,14 @@ for url, id, a, b in files:
             os.remove(tempFile)
             continue
 
-    shutil.move(tempFile, latestFile)
+    shutil.move(tempFile, pre32file)
+    # the following line calls ImageMagic's convert, not ../convert
+    subprocess.call(["convert", pre32file, 'PNG32:'+latestFile])
+    
     latestMerc = id+'-merc-latest.png'
     stencil = '../stencil/' + id + '-stencil.png'
     try:
+        print("../convert", a, b, latestFile, latestMerc, stencil)
         output = subprocess.check_output(["../convert", a, b, latestFile, latestMerc, stencil])
     except subprocess.CalledProcessError:
         continue

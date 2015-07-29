@@ -12,7 +12,9 @@ using namespace std;
 using namespace cv;
 
 typedef Mat_<Vec4b> Image;
-Vec4b backgroundOuter(164,160,160,255);
+Vec4b backgroundOuter1(164,160,160,255);
+Vec4b backgroundOuter2(165,160,160,255);
+Vec4b lineColor(115,115,115,255);
 Vec4b backgroundInner(208,208,208,255);
 Vec4b boundaryColor(128,0,0,255);
 Vec4b transparent(0,0,0,0);
@@ -61,7 +63,7 @@ bool boundaryPoint(const Image& im, int x, int y) {
             int cx = x + dx;
             int cy = y + dy;
             if (cx>=0 && cx<im.cols && cy>=0 && cy<im.rows) {
-                if ((im(cy,cx) == backgroundOuter)||(im(cy,cx)==transparent)) cntOuter++;
+                if ((im(cy,cx) == backgroundOuter1)||(im(cy,cx) == backgroundOuter2)||(im(cy,cx)==transparent)) cntOuter++;
                 if (im(cy,cx) == backgroundInner) cntInner++;
             } else cntOuter++;
         }
@@ -228,11 +230,11 @@ point detectCenter(const Image& im) {
     std::vector<int> cntBgY(im.rows, 0);
     for (int y=0; y<im.rows; y++)
         for (int x=0; x<im.cols; x++) {
-                if (im(y, x) == Vec4b(164,160,160,255)) { // if this is background
+                if ((im(y, x) == backgroundOuter1)||(im(y, x) == backgroundOuter2)) { // if this is background
                     cntBgX[x]++;
                     cntBgY[y]++;
                 }
-                if (im(y, x) == Vec4b(115,115,115,255)) {
+                if (im(y, x) == lineColor) {
                     cntLineX[x]++;
                     cntLineY[y]++;
                 }
