@@ -12,8 +12,7 @@ using namespace std;
 using namespace cv;
 
 typedef Mat_<Vec4b> Image;
-Vec4b backgroundOuter1(164,160,160,255);
-Vec4b backgroundOuter2(165,160,160,255);
+Vec4b backgroundOuter(164,160,160,255);
 Vec4b lineColor(115,115,115,255);
 Vec4b backgroundInner(208,208,208,255);
 Vec4b boundaryColor(128,0,0,255);
@@ -39,6 +38,10 @@ vector<Vec4b> palette{ // generated using make_palette
                         {255, 136, 62, 255},
                         {255, 170, 255, 255},
                         {255, 198, 162, 255}};
+Vec4b badPaletteColor{0, 68, 136, 255}; // this is the color that sometimes coincides with a color of a road
+                                        // it is accepted as a color to be left on the map
+                                        // but not as a replacement color 
+int colorEps = 2;
 
 
 struct point {
@@ -56,24 +59,29 @@ point transform(const projPJ& from, const projPJ& to, point xy) {
     return xy;
 }
 
+bool eqColor(const Vec4b& a, const Vec4b& b, const int eps=colorEps) {
+    int diff = abs(a[0]-b[0]) + abs(a[1]-b[1]) + abs(a[2]-b[2]) + abs(a[3]-b[3]);
+    return diff < eps;
+}
+
 bool boundaryPoint(const Image& im, int x, int y) {
     int cntOuter = 0, cntInner=0;
-    for (int dy=-1; dy<=1; dy++) 
-        for (int dx=-1; dx<=1; dx++) {
+    for (int dy=-2; dy<=2; dy++) 
+        for (int dx=-2; dx<=2; dx++) {
             int cx = x + dx;
             int cy = y + dy;
             if (cx>=0 && cx<im.cols && cy>=0 && cy<im.rows) {
-                if ((im(cy,cx) == backgroundOuter1)||(im(cy,cx) == backgroundOuter2)||(im(cy,cx)==transparent)) cntOuter++;
-                if (im(cy,cx) == backgroundInner) cntInner++;
+                if (eqColor(im(cy,cx), backgroundOuter)||(im(cy,cx)==transparent)) cntOuter++;
+                if (eqColor(im(cy,cx), backgroundInner)) cntInner++;
             } else cntOuter++;
         }
-    return ((cntOuter > 0) && (cntInner > 0));
+    return ((cntOuter > 3) && (cntInner > 3));
 }
 
 bool isPaletteColor(const Vec4b& col) {
     bool paletteColor = false;
     for(const auto& p: palette) 
-        paletteColor = paletteColor || (p == col);
+        paletteColor = paletteColor || eqColor(p,col);
     return paletteColor;
 }
 
@@ -85,7 +93,7 @@ Vec4b neibColor(const Image& im, int x, int y) {
             int cx = x + dx;
             int cy = y + dy;
             if (cx>=0 && cx<im.cols && cy>=0 && cy<im.rows) {
-                if (isPaletteColor(im(cy,cx)) && (abs(dx)+abs(dy)<mindist)) {
+                if (isPaletteColor(im(cy,cx)) && (im(cy,cx)!=badPaletteColor) && (abs(dx)+abs(dy)<mindist)) {
                     mindist = abs(dx)+abs(dy);
                     res = im(cy,cx);
                 }
@@ -101,18 +109,22 @@ bool isKeptBlack(const Image& im, int x, int y, const Image& stencil) {
             int cx = x + dx;
             int cy = y + dy;
             if (cx>=0 && cx<stencil.cols && cy>=0 && cy<stencil.rows) {
-                hasBlackNear = hasBlackNear || (stencil(cy, cx) == black);
+                hasBlackNear = hasBlackNear || eqColor(stencil(cy, cx), black, 10);
             }
         }
     
-    return (im(y,x) == black) && (!hasBlackNear);
+    return eqColor(im(y,x), black) && (!hasBlackNear);
+}
+
+bool isBadRoadColor(const Image& im, int x, int y, const Image& stencil) {
+    return eqColor(im(y,x), badPaletteColor) && eqColor(stencil(y,x), badPaletteColor, 50);
 }
 
 Vec4b replacementColor(const Image& im, int x, int y, const Image& stencil) {
     if (boundaryPoint(im, x, y)) 
         return boundaryColor;
 
-    if ((!isPaletteColor(im(y,x))) && (!isKeptBlack(im, x, y, stencil)))
+    if (((!isPaletteColor(im(y,x))) && (!isKeptBlack(im, x, y, stencil))) || (isBadRoadColor(im, x, y, stencil)))
         return neibColor(im, x, y);
     
     return im(y,x);
@@ -192,6 +204,7 @@ Image transformProjection(const Image& source, point earthCenterDeg, point sourc
             }
         }
     Image targetWoBackground = target.clone();
+    std::cout << "Removing background" << std::endl;
     for (int targetYpx=0; targetYpx<target.rows; targetYpx++)
         for (int targetXpx=0; targetXpx<target.cols; targetXpx++) {
             targetWoBackground(targetYpx, targetXpx) = replacementColor(target, targetXpx, targetYpx, stencil);
@@ -230,11 +243,11 @@ point detectCenter(const Image& im) {
     std::vector<int> cntBgY(im.rows, 0);
     for (int y=0; y<im.rows; y++)
         for (int x=0; x<im.cols; x++) {
-                if ((im(y, x) == backgroundOuter1)||(im(y, x) == backgroundOuter2)) { // if this is background
+                if (eqColor(im(y, x), backgroundOuter)) { 
                     cntBgX[x]++;
                     cntBgY[y]++;
                 }
-                if (im(y, x) == lineColor) {
+                if (eqColor(im(y, x), lineColor)) {
                     cntLineX[x]++;
                     cntLineY[y]++;
                 }
