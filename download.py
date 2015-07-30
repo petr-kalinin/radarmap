@@ -27,7 +27,7 @@ for url, id, a, b in files:
     print("Processing " + id)
     tempFile = id+'-temp.png'
     latestFile = id+'-latest.png'
-    pre32file = id+'-temp-pre32.png'
+    in32file = id+'-temp-in32.png'
     urllib.request.urlretrieve(url, tempFile)
     if (os.path.isfile(latestFile)):
         hashNew = hashlib.sha256(open(tempFile, 'rb').read()).digest()
@@ -37,15 +37,15 @@ for url, id, a, b in files:
             os.remove(tempFile)
             continue
 
-    shutil.move(tempFile, pre32file)
+    shutil.move(tempFile, latestFile)
     # the following line calls ImageMagic's convert, not ../convert
-    subprocess.call(["convert", pre32file, 'PNG32:'+latestFile])
+    subprocess.call(["convert", latestFile, 'PNG32:'+in32file])
     
     latestMerc = id+'-merc-latest.png'
     stencil = '../stencil/' + id + '-stencil.png'
     try:
-        print("../convert", a, b, latestFile, latestMerc, stencil)
-        output = subprocess.check_output(["../convert", a, b, latestFile, latestMerc, stencil])
+        print("../convert", a, b, in32file, latestMerc, stencil)
+        output = subprocess.check_output(["../convert", a, b, in32file, latestMerc, stencil])
     except subprocess.CalledProcessError:
         continue
     corners = parseCorners(output)
