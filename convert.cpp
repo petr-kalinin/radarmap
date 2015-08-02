@@ -131,7 +131,7 @@ Vec4b replacementColor(const Image& im, int x, int y, const Image& stencil) {
     return im(y,x);
 }
 
-Image transformProjection(const Image& source, point earthCenterDeg, point sourceCenter, double sourcePixelPerRad, int targetHeight, const Image& stencil) {
+Image transformProjection(const Image& source, point earthCenterDeg, point sourceCenter, double sourcePixelPerRad, int targetHeight) {
     cout << "sourcePixelPerRad = " << sourcePixelPerRad << endl;
     double sourcePixelPerDeg = sourcePixelPerRad / 180 * M_PI;
     point earthCenterRad{
@@ -205,21 +205,24 @@ Image transformProjection(const Image& source, point earthCenterDeg, point sourc
                 target(targetYpx, targetXpx) = source(sourceYpx, sourceXpx);
             }
         }
+/*
+    point targetCenter = transform(sourceProj, targetProj, point{0,0});
+    int targetXpx = int((targetCenter.x - targetTopLeft.x)/(targetBotRight.x-targetTopLeft.x)*targetWidth + 0.5);
+    int targetYpx = int((targetBotRight.y-targetCenter.y)/(targetBotRight.y-targetTopLeft.y)*targetHeight + 0.5);
+    cout << "targetCenter: " << targetXpx << " " << targetYpx << endl;
+    target(targetYpx, targetXpx) = Vec4b(255,0,255,255);
+*/        
+    cout << "Corner-coordinates of result: " << targetTopLeft << " " << targetBotRight << endl;
+    return target;
+}
+
+Image removeBackground(const Image& target, const Image& stencil) {
     Image targetWoBackground = target.clone();
     std::cout << "Removing background" << std::endl;
     for (int targetYpx=0; targetYpx<target.rows; targetYpx++)
         for (int targetXpx=0; targetXpx<target.cols; targetXpx++) {
             targetWoBackground(targetYpx, targetXpx) = replacementColor(target, targetXpx, targetYpx, stencil);
         }
-    
-/*
-    point targetCenter = transform(sourceProj, targetProj, point{0,0});
-    int targetXpx = int((targetCenter.x - targetTopLeft.x)/(targetBotRight.x-targetTopLeft.x)*targetWidth + 0.5);
-    int targetYpx = int((targetBotRight.y-targetCenter.y)/(targetBotRight.y-targetTopLeft.y)*targetHeight + 0.5);
-    cout << "targetCenter: " << targetXpx << " " << targetYpx << endl;
-    targetWoBackground(targetYpx, targetXpx) = Vec4b(255,0,255,255);
-*/        
-    cout << "Corner-coordinates of result: " << targetTopLeft << " " << targetBotRight << endl;
 
     return targetWoBackground;
 }
@@ -336,7 +339,8 @@ int main(int argc, char* argv[]) {
     float sourceScaling = 1;
     detectCenter(source, sourceCenter, sourceScaling);
     
-    Image result = transformProjection(source, earthCenterDeg, sourceCenter, defaultSourcePixelPerRad * sourceScaling, targetHeight, stencil);
+    Image resultWithBG = transformProjection(source, earthCenterDeg, sourceCenter, defaultSourcePixelPerRad * sourceScaling, targetHeight);    
+    Image result = removeBackground(resultWithBG, stencil);
 
     vector<int> compression_params;
     compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
