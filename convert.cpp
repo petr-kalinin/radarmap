@@ -71,11 +71,11 @@ bool boundaryPoint(const Image& im, int x, int y) {
             int cx = x + dx;
             int cy = y + dy;
             if (cx>=0 && cx<im.cols && cy>=0 && cy<im.rows) {
-                if (eqColor(im(cy,cx), backgroundOuter)||(im(cy,cx)==transparent)) cntOuter++;
-                if (eqColor(im(cy,cx), backgroundInner)) cntInner++;
+                if (eqColor(im(cy,cx), backgroundOuter, 10)||(im(cy,cx)==transparent)) cntOuter++;
+                if (eqColor(im(cy,cx), backgroundInner, 10)) cntInner++;
             } else cntOuter++;
         }
-    return ((cntOuter > 3) && (cntInner > 3));
+    return ((cntOuter > 5) && (cntInner > 5));
 }
 
 bool isPaletteColor(const Vec4b& col) {
