@@ -12,13 +12,13 @@ using namespace std;
 using namespace cv;
 
 typedef Mat_<Vec4b> Image;
-Vec4b backgroundOuter(164,160,160,255);
-Vec4b lineColor(115,115,115,255);
-Vec4b backgroundInner(208,208,208,255);
-Vec4b boundaryColor(128,0,0,255);
-Vec4b transparent(0,0,0,0);
-Vec4b black(0,0,0,255);
-vector<Vec4b> palette{ // generated using make_palette
+const Vec4b backgroundOuter(164,160,160,255);
+const Vec4b lineColor(115,115,115,255);
+const Vec4b backgroundInner(208,208,208,255);
+const Vec4b boundaryColor(128,0,0,255);
+const Vec4b transparent(0,0,0,0);
+const Vec4b black(0,0,0,255);
+const vector<Vec4b> palette{ // generated using make_palette
                         {0, 0, 95, 255},
                         {0, 0, 255, 255},
                         {0, 68, 136, 255},
@@ -38,10 +38,11 @@ vector<Vec4b> palette{ // generated using make_palette
                         {255, 136, 62, 255},
                         {255, 170, 255, 255},
                         {255, 198, 162, 255}};
-Vec4b badPaletteColor{0, 68, 136, 255}; // this is the color that sometimes coincides with a color of a road
+const Vec4b badPaletteColor{0, 68, 136, 255}; // this is the color that sometimes coincides with a color of a road
                                         // it is accepted as a color to be left on the map
                                         // but not as a replacement color 
-int colorEps = 2;
+const int colorEps = 2;
+const int defaultLineDelta = 120;
 
 
 struct point {
@@ -131,6 +132,7 @@ Vec4b replacementColor(const Image& im, int x, int y, const Image& stencil) {
 }
 
 Image transformProjection(const Image& source, point earthCenterDeg, point sourceCenter, double sourcePixelPerRad, int targetHeight, const Image& stencil) {
+    cout << "sourcePixelPerRad = " << sourcePixelPerRad << endl;
     double sourcePixelPerDeg = sourcePixelPerRad / 180 * M_PI;
     point earthCenterRad{
         earthCenterDeg.x / 180*M_PI, 
@@ -236,18 +238,18 @@ std::vector<int> makeCumulative(const std::vector<int>& v) {
     return res;
 }
 
-point detectCenter(const Image& im) {
+void detectCenter(const Image& im, point& detectedCenter, float& detectedScaling) {
     std::vector<int> cntLineX(im.cols, 0);
     std::vector<int> cntLineY(im.rows, 0);
     std::vector<int> cntBgX(im.cols, 0);
     std::vector<int> cntBgY(im.rows, 0);
     for (int y=0; y<im.rows; y++)
         for (int x=0; x<im.cols; x++) {
-                if (eqColor(im(y, x), backgroundOuter)) { 
+                if (eqColor(im(y, x), backgroundOuter, 10)) { 
                     cntBgX[x]++;
                     cntBgY[y]++;
                 }
-                if (eqColor(im(y, x), lineColor)) {
+                if (eqColor(im(y, x), lineColor, 10)) {
                     cntLineX[x]++;
                     cntLineY[y]++;
                 }
@@ -255,21 +257,44 @@ point detectCenter(const Image& im) {
     std::vector<int> cumBgX = makeCumulative(cntBgX);
     std::vector<int> cumBgY = makeCumulative(cntBgY);
     
+    int maxLineX = *max_element(cntLineX.begin(), cntLineX.end());
+    int maxLineY = *max_element(cntLineY.begin(), cntLineY.end());
+    cout << "maxLineX=" << maxLineX << " of " << im.rows << endl;
+    cout << "maxLineY=" << maxLineY << " of " << im.cols << endl;
+    std::map<int, int> deltas;
+    
     point result{0,0};
+    int prev = -1;
     for(int x=0; x<cntLineX.size(); x++)
-        if (cntLineX[x] > im.rows *7/10) {
-            cout << "X-candidate: " << x << " " << double(cntLineX[x]) / im.rows << " " << cumBgX[x] << endl;
+        if (cntLineX[x] > maxLineX *7/10) {
+            cout << "X-candidate: " << x << " " << double(cntLineX[x]) / maxLineX << " " << cumBgX[x] << endl;
             if (cumBgX[x] < cumBgX[result.x])
                 result.x = x;
+            if (prev != -1)
+                deltas[x - prev] ++;
+            prev = x;
         }
+    prev = -1;
     for(int y=0; y<cntLineY.size(); y++)
-        if (cntLineY[y] > im.cols *7/10) {
-            cout << "Y-candidate: " << y << " " << double(cntLineY[y]) / im.cols << " " << cumBgY[y] << endl;
+        if (cntLineY[y] > maxLineY *7/10) {
+            cout << "Y-candidate: " << y << " " << double(cntLineY[y]) / maxLineY << " " << cumBgY[y] << endl;
             if (cumBgY[y] < cumBgY[result.y])
                 result.y = y;
+            if (prev != -1)
+                deltas[y - prev] ++;
+            prev = y;
         }
-    cout << "Detected center @ " << result << endl;
-    return result;
+    pair<int, int> maxDelta = *deltas.begin();
+    for (auto v: deltas)
+        if (v.second > maxDelta.second)
+            maxDelta = v;
+    cout << "Deltas: ";
+    for (auto v: deltas)
+        cout << v.first << " " << v.second << endl;
+    detectedCenter = result;
+    detectedScaling = (float)maxDelta.first / defaultLineDelta;
+    cout << "Detected center @ " << detectedCenter << endl;
+    cout << "Detected scaling " << detectedScaling << endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -295,7 +320,7 @@ int main(int argc, char* argv[]) {
     std::string targetName(argv[4]);
     std::string stencilName(argv[5]);
 
-    double sourcePixelPerRad = 12750;
+    double defaultSourcePixelPerRad = 12750;
     int targetHeight = 1000;
     
     // Setup a rectangle to define your region of interest
@@ -307,9 +332,11 @@ int main(int argc, char* argv[]) {
     
     Image stencil = imread(stencilName, -1);
     
-    point sourceCenter = detectCenter(source);
+    point sourceCenter{0,0};
+    float sourceScaling = 1;
+    detectCenter(source, sourceCenter, sourceScaling);
     
-    Image result = transformProjection(source, earthCenterDeg, sourceCenter, sourcePixelPerRad, targetHeight, stencil);
+    Image result = transformProjection(source, earthCenterDeg, sourceCenter, defaultSourcePixelPerRad * sourceScaling, targetHeight, stencil);
 
     vector<int> compression_params;
     compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);

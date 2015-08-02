@@ -60,7 +60,8 @@ for url, id, a, b in files:
     if (not (id in images.keys())):
         images[id]={"images" : []}
     images[id]["images"].insert(0, timeMark)
-    if (not ("corners" in images[id].keys())) and (corners):
+    #if (not ("corners" in images[id].keys())) and (corners):
+    if (corners):
         images[id]["corners"] = corners
     with open(imagesFileName,'w') as imagesFile:    
         json.dump(images, imagesFile)
