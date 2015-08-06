@@ -22,12 +22,12 @@ function init() {
             //url: 'http://ingreelab.net/C04AF0B62BEC112E8D7242FB848631D12D252728/{z}/{x}/{y}.png',
             url: 'tiles.php?z={z}&x={x}&y={y}',
             attributions: [
-                new ol.Attribution({ html: ['Данные карты &copy; участники <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, ODbL; изображения &copy; <a href="http://чепецк.net">Чепецк.net</a>'] }),
+                new ol.Attribution({ html: ['Данные карты &copy; участники <a href="http://www.openstreetmap.org/">OpenStreetMap</a>, <a href="http://www.openstreetmap.org/copyright">ODbL</a>; изображения &copy; <a href="http://чепецк.net">Чепецк.net</a>'] }),
                 new ol.Attribution({
                     html: 'Данные с радаров &copy; <a href="http://meteorad.ru/">ФГБУ «ЦАО» Росгидромета, НТЦР ДМРЛ</a>'
                 }),
                 new ol.Attribution({
-                    html: 'Сборка всего на одну карту &copy; <a href="mailto:petr@kalinin.nnov.ru">Петр Калинин</a>, <a href="http://www.gnu.org/licenses/agpl-3.0.en.html">AGPL</a>, <a href="https://github.com/petr-kalinin/radarmap">github.com/petr-kalinin/radarmap</a>'
+                    html: 'Сборка всего на одну карту &copy; <a href="mailto:petr@kalinin.nnov.ru">Петр Калинин</a>, <a href="http://www.gnu.org/licenses/agpl-3.0.en.html">GNU AGPL</a>, <a href="https://github.com/petr-kalinin/radarmap">github.com/petr-kalinin/radarmap</a>'
                 })
             ]
         })
