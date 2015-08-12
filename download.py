@@ -10,11 +10,15 @@ import subprocess
 import json
 import re
 
-files = [('http://www.meteorad.ru/data/UVKNizhnyNovgorod.png', 'Nizhny', '43.97798', '56.296179'),
-         ('http://www.meteorad.ru/data/UVKKostroma.png', 'Kostroma', '41.017018', '57.800240'),
-         ('http://www.meteorad.ru/data/UVKProfsoyuz.png', 'Moscow', '37.549006', '55.648246')]
+files = [
+         ('RUDN', 'Nizhny', '43.97798', '56.296179'),
+         ('RUDK', 'Kostroma', '41.017018', '57.800240'),
+         ('RAVN', 'Vnukovo', '37.249651', '55.584229')
+         ]
 workDir = 'images'
 imagesFileName = '../images.json'
+urlTemplate = 'http://meteorad.ru/screenshots/%s/screenshot.png'
+#urlTemplate = 'http://meteorad.ru/screenshots/placenames/%s.png'
 
 def parseCorners(output):
     match = re.search(r'Corner-coordinates of result: \(([0-9.]+) ([0-9.]+)\) \(([0-9.]+) ([0-9.]+)\)', output.decode())
@@ -23,11 +27,12 @@ def parseCorners(output):
     return match.group(1,2,3,4)
 
 os.chdir(workDir)
-for url, id, a, b in files:
+for extId, id, a, b in files:
     print("Processing " + id)
     tempFile = id+'-temp.png'
     latestFile = id+'-latest.png'
     in32file = id+'-temp-in32.png'
+    url = urlTemplate % extId
     urllib.request.urlretrieve(url, tempFile)
     if (os.path.isfile(latestFile)):
         hashNew = hashlib.sha256(open(tempFile, 'rb').read()).digest()

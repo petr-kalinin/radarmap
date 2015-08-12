@@ -4,21 +4,23 @@
 
 #include "palette.h"
 
-const double ProjectionConvertor::sourcePixelPerRad = 12750;
+const double ProjectionConvertor::defaultSourcePixelPerRad = 12750.0 / 500 * 250;
+const int ProjectionConvertor::defaultSize = 600;
 const int ProjectionConvertor::resultHeight = 1000;
 
 ProjectionConvertor::ProjectionConvertor(const Image& source, const point& earthCenterDeg, const point& sourceCenter):
     source_(source),
     result_(),
     earthCenterDeg_(earthCenterDeg),
-    sourceCenter_(sourceCenter)
+    sourceCenter_(sourceCenter),
+    sourcePixelPerRad_(defaultSourcePixelPerRad / defaultSize * source.cols)
 {
     transformProjection();
 }
 
 void ProjectionConvertor::transformProjection() {
-    std::cout << "sourcePixelPerRad = " << sourcePixelPerRad << std::endl;
-    double sourcePixelPerDeg = sourcePixelPerRad / 180 * M_PI;
+    std::cout << "sourcePixelPerRad_ = " << sourcePixelPerRad_ << std::endl;
+    double sourcePixelPerDeg = sourcePixelPerRad_ / 180 * M_PI;
     point earthCenterRad{
         earthCenterDeg_.x / 180*M_PI, 
         earthCenterDeg_.y / 180*M_PI
@@ -48,8 +50,8 @@ void ProjectionConvertor::transformProjection() {
     std::cout << "Center@result_: " << transform(earthProj, resultProj, earthCenterRad) << std::endl;
 
     point earthRadiusRad{
-        source_.cols/2.0 / sourcePixelPerRad / cos(earthCenterRad.y), 
-        source_.rows/2.0 / sourcePixelPerRad
+        source_.cols/2.0 / sourcePixelPerRad_ / cos(earthCenterRad.y), 
+        source_.rows/2.0 / sourcePixelPerRad_
     };
     point earthTopLeftRad{
         earthCenterRad.x - earthRadiusRad.x,
@@ -84,8 +86,8 @@ void ProjectionConvertor::transformProjection() {
                 resultTopLeft.y + ((resultBotRight.y-resultTopLeft.y) * (resultHeight-resultYpx)) / resultHeight
             };
             point sourceXY = transform(resultProj, sourceProj, resultXY);
-            int sourceXpx = int(sourceXY.x * sourcePixelPerRad + sourceCenter_.x + 0.5);
-            int sourceYpx = int(-sourceXY.y * sourcePixelPerRad + sourceCenter_.y + 0.5);
+            int sourceXpx = int(sourceXY.x * sourcePixelPerRad_ + sourceCenter_.x + 0.5);
+            int sourceYpx = int(-sourceXY.y * sourcePixelPerRad_ + sourceCenter_.y + 0.5);
             if (goodPoint(source_, sourceXpx, sourceYpx)) {
                 result_(resultYpx, resultXpx) = source_(sourceYpx, sourceXpx);
             }

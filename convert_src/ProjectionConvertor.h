@@ -11,7 +11,8 @@ class ProjectionConvertor {
         const Image& getResult() const;
     
     private:
-        static const double sourcePixelPerRad;
+        static const double defaultSourcePixelPerRad;
+        static const int defaultSize;
         static const int resultHeight;
         
         const Image& source_;
@@ -19,6 +20,7 @@ class ProjectionConvertor {
         
         const point& earthCenterDeg_;
         const point& sourceCenter_;
+        double sourcePixelPerRad_;
 
         void transformProjection();
         

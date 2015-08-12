@@ -14,22 +14,12 @@ int main(int argc, char* argv[]) {
     point earthCenterDeg {std::stof(argv[1]), std::stof(argv[2])};
     std::string sourceName(argv[3]);
     std::string targetName(argv[4]);
-    std::string stencilName(argv[5]);
 
     Image source = imread(sourceName, -1);
     
-    Rect cropArea(185, 54, 1365-185, 1014-54);
-    source = source(cropArea);
+    BackgroundRemover br(source);
     
-    Image stencil = imread(stencilName, -1);
-    stencil = stencil(cropArea);
-    
-    CenterDetector sourceCD(source);
-    CenterDetector stencilCD(stencil);
-    
-    BackgroundRemover br(sourceCD.getResult(), stencilCD.getResult());
-    
-    ProjectionConvertor pc(br.getResult(), earthCenterDeg, sourceCD.getResultCenter());
+    ProjectionConvertor pc(br.getResult(), earthCenterDeg, br.getResultCenter());
     
     vector<int> compression_params;
     compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
