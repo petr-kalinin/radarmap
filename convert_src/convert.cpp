@@ -2,7 +2,6 @@
 #include <string>
 
 #include "misc.h"
-#include "CenterDetector.h"
 #include "ProjectionConvertor.h"
 #include "BackgroundRemover.h"
 
