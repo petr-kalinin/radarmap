@@ -20,6 +20,8 @@ class BackgroundRemover {
         
         void removeBackground();
         Vec4b replacementColor(int x, int y);
+        Vec4b getSimilarPaletteColor(Vec4b col);
+        float getCorrectedColorDistance(Vec4b a, Vec4b b);
 };
 
 #endif

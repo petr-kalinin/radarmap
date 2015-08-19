@@ -22,6 +22,17 @@ struct VecLess {
     }
 };
 
+struct SortVecLess {
+    bool operator()(const std::pair<int,Vec4b>& a, const std::pair<int,Vec4b>& b) const {
+        if (a.first != b.first)
+            return a.first < b.first;
+        for (int i=0; i<4; i++)
+            if (a.second[i]!=b.second[i])
+                return a.second[i]<b.second[i];
+        return false;
+    }
+};
+
 int main(int argc, char* argv[]) {
     Image source = imread("palette.png", -1);
     
@@ -35,8 +46,14 @@ int main(int argc, char* argv[]) {
             colors[color]++;
         }
         
+    std::vector<std::pair<int, Vec4b>> colorsSorted;
+        
     for(auto x: colors)
-        cout << x.first << " " << x.second << endl;
+        colorsSorted.emplace_back(x.second, x.first);
+    sort(colorsSorted.begin(), colorsSorted.end(), SortVecLess());
+    
+    for(auto x: colorsSorted)
+        cout << x.second << " " << x.first << endl;
     
     return 0;
 }

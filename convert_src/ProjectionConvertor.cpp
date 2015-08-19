@@ -4,8 +4,11 @@
 
 #include "palette.h"
 
-const double ProjectionConvertor::defaultSourcePixelPerRad = 12750.0 / 500 * 250;
-const int ProjectionConvertor::defaultSize = 600;
+const double ProjectionConvertor::defaultSourcePixelPerRad = 7500;//7430.0;  
+/*
+ * 7430 < x
+ * 7500 < x
+ */
 const int ProjectionConvertor::resultHeight = 1000;
 
 ProjectionConvertor::ProjectionConvertor(const Image& source, const point& earthCenterDeg, const point& sourceCenter):
@@ -13,7 +16,7 @@ ProjectionConvertor::ProjectionConvertor(const Image& source, const point& earth
     result_(),
     earthCenterDeg_(earthCenterDeg),
     sourceCenter_(sourceCenter),
-    sourcePixelPerRad_(defaultSourcePixelPerRad / defaultSize * source.cols)
+    sourcePixelPerRad_(defaultSourcePixelPerRad)
 {
     transformProjection();
 }
@@ -92,13 +95,7 @@ void ProjectionConvertor::transformProjection() {
                 result_(resultYpx, resultXpx) = source_(sourceYpx, sourceXpx);
             }
         }
-/*
-    point resultCenter = transform(sourceProj, resultProj, point{0,0});
-    int resultXpx = int((resultCenter.x - resultTopLeft.x)/(resultBotRight.x-resultTopLeft.x)*resultWidth + 0.5);
-    int resultYpx = int((resultBotRight.y-resultCenter.y)/(resultBotRight.y-resultTopLeft.y)*resultHeight + 0.5);
-    std::cout << "resultCenter: " << resultXpx << " " << resultYpx << std::endl;
-    result_(resultYpx, resultXpx) = Vec4b(255,0,255,255);
-*/        
+
     std::cout << "Corner-coordinates of result: " << resultTopLeft << " " << resultBotRight << std::endl;
 }
 

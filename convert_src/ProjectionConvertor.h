@@ -12,7 +12,6 @@ class ProjectionConvertor {
     
     private:
         static const double defaultSourcePixelPerRad;
-        static const int defaultSize;
         static const int resultHeight;
         
         const Image& source_;

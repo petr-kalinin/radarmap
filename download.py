@@ -9,6 +9,7 @@ import datetime
 import subprocess
 import json
 import re
+import time
 
 files = [
          ('RUDN', 'Nizhny', '43.97798', '56.296179'),
@@ -17,8 +18,7 @@ files = [
          ]
 workDir = 'images'
 imagesFileName = '../images.json'
-urlTemplate = 'http://meteorad.ru/screenshots/%s/screenshot.png'
-#urlTemplate = 'http://meteorad.ru/screenshots/placenames/%s.png'
+urlTemplate = 'http://meteoinfo.by/radar/%s/%s_%d.png'
 
 def parseCorners(output):
     match = re.search(r'Corner-coordinates of result: \(([0-9.]+) ([0-9.]+)\) \(([0-9.]+) ([0-9.]+)\)', output.decode())
@@ -28,12 +28,22 @@ def parseCorners(output):
 
 os.chdir(workDir)
 for extId, id, a, b in files:
-    print("Processing " + id)
     tempFile = id+'-temp.png'
     latestFile = id+'-latest.png'
     in32file = id+'-temp-in32.png'
-    url = urlTemplate % extId
-    urllib.request.urlretrieve(url, tempFile)
+    radTime = int(time.time())
+    # round to nearest full 10 minutes accounting for ~4min shift
+    radTime = int((radTime - 4*60) / (10*60)) * (10*60)
+    while True:
+        print("Processing " + id + " time: " + str(radTime))
+        url = urlTemplate % (extId, extId, radTime )
+        try:
+            urllib.request.urlretrieve(url, tempFile)
+        except:
+            print("File not found yet, let's try 10 minutes earlier")
+            radTime -= 10*60
+            continue
+        break
     if (os.path.isfile(latestFile)):
         hashNew = hashlib.sha256(open(tempFile, 'rb').read()).digest()
         hashLatest = hashlib.sha256(open(latestFile, 'rb').read()).digest()
