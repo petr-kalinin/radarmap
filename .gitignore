@@ -4,5 +4,3 @@ calc_stencil
 make_palette
 *.o
 t
-images
-images.json

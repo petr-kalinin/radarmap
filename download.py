@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# (c) Petr Kalinin, https://github.com/petr-kalinin/radarmap, GNU AGPL
 import urllib.request
 import hashlib
 import os
@@ -9,11 +10,15 @@ import subprocess
 import json
 import re
 
-files = [('http://www.meteorad.ru/data/UVKNizhny.png', 'Nizhny', '43.97798', '56.296179'),
-         ('http://www.meteorad.ru/data/UVKKostroma.png', 'Kostroma', '41.017018', '57.800240'),
-         ('http://www.meteorad.ru/data/UVKProfsoyuz.png', 'Moscow', '37.549006', '55.648246')]
+files = [
+         ('RUDN', 'Nizhny', '43.97798', '56.296179'),
+         ('RUDK', 'Kostroma', '41.017018', '57.800240'),
+         ('RAVN', 'Vnukovo', '37.249651', '55.584229')
+         ]
 workDir = 'images'
 imagesFileName = '../images.json'
+urlTemplate = 'http://meteorad.ru/screenshots/%s/screenshot.png'
+#urlTemplate = 'http://meteorad.ru/screenshots/placenames/%s.png'
 
 def parseCorners(output):
     match = re.search(r'Corner-coordinates of result: \(([0-9.]+) ([0-9.]+)\) \(([0-9.]+) ([0-9.]+)\)', output.decode())
@@ -22,10 +27,12 @@ def parseCorners(output):
     return match.group(1,2,3,4)
 
 os.chdir(workDir)
-for url, id, a, b in files:
+for extId, id, a, b in files:
     print("Processing " + id)
     tempFile = id+'-temp.png'
     latestFile = id+'-latest.png'
+    in32file = id+'-temp-in32.png'
+    url = urlTemplate % extId
     urllib.request.urlretrieve(url, tempFile)
     if (os.path.isfile(latestFile)):
         hashNew = hashlib.sha256(open(tempFile, 'rb').read()).digest()
@@ -36,10 +43,14 @@ for url, id, a, b in files:
             continue
 
     shutil.move(tempFile, latestFile)
+    # the following line calls ImageMagic's convert, not ../convert
+    subprocess.call(["convert", latestFile, 'PNG32:'+in32file])
+    
     latestMerc = id+'-merc-latest.png'
     stencil = '../stencil/' + id + '-stencil.png'
     try:
-        output = subprocess.check_output(["../convert", a, b, latestFile, latestMerc, stencil])
+        print("../convert", a, b, in32file, latestMerc, stencil)
+        output = subprocess.check_output(["../convert", a, b, in32file, latestMerc, stencil])
     except subprocess.CalledProcessError:
         continue
     corners = parseCorners(output)
@@ -54,7 +65,8 @@ for url, id, a, b in files:
     if (not (id in images.keys())):
         images[id]={"images" : []}
     images[id]["images"].insert(0, timeMark)
-    if (not ("corners" in images[id].keys())) and (corners):
+    #if (not ("corners" in images[id].keys())) and (corners):
+    if (corners):
         images[id]["corners"] = corners
     with open(imagesFileName,'w') as imagesFile:    
         json.dump(images, imagesFile)

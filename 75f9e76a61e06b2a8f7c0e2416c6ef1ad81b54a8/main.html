@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <link rel="stylesheet" href="http://openlayers.org/en/v3.5.0/css/ol.css" type="text/css">
+    <style>
+      .map {
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+    <script src="http://openlayers.org/en/v3.5.0/build/ol.js" type="text/javascript"></script>
+    <title>OpenLayers 3 example</title>
+  </head>
+  <body>
+    <div id="map" class="map"></div>
+    <script type="text/javascript">
+        var osmLayer = new ol.layer.Tile({
+            source: new ol.source.MapQuest({layer: 'osm'})
+        });
+
+        //var extent1 = ol.proj.transform([39.4, 54.1], 'EPSG:4326', 'EPSG:3857');
+        //var extent2 = ol.proj.transform([40, 58.45], 'EPSG:4326', 'EPSG:3857');
+        var extent1 = [4364696.706983571, 7196099.93438077]
+        var extent2 = [5426605.028042602, 8062618.0504191]
+        var extent = [extent1[0], extent1[1], extent2[0], extent2[1]];
+        var imageLayerNN = new ol.layer.Image({
+            source: new ol.source.ImageStatic({
+                url: 'UVKNizhny-merc.png',
+                imageExtent: extent, 
+            }),
+            opacity: 0.5
+         });
+
+        var extent1 = ol.proj.transform([39.98, 53.78], 'EPSG:4326', 'EPSG:3857');
+        var extent2 = ol.proj.transform([41, 58.53], 'EPSG:4326', 'EPSG:3857');
+        var extent = [extent1[0], extent1[1], extent2[0], extent2[1]];
+        var imageLayerNNaz = new ol.layer.Image({
+            source: new ol.source.ImageStatic({
+                url: 'NN-azim.png',
+                imageExtent: extent, 
+            }),
+            opacity: 0.5
+         });
+         
+        //var extent1 = ol.proj.transform([36.3, 55.7], 'EPSG:4326', 'EPSG:3857');
+        //var extent2 = ol.proj.transform([40, 59.95], 'EPSG:4326', 'EPSG:3857');
+        var extent1 = [4017502.552186516, 7492596.015724386]
+        var extent2 = [5114261.924068971, 8388732.016104072]
+        var extent = [extent1[0], extent1[1], extent2[0], extent2[1]];
+        var imageLayerK = new ol.layer.Image({
+            source: new ol.source.ImageStatic({
+                url: 'UVKKostroma-merc.png',
+                imageExtent: extent, 
+            }),
+            opacity: 0.5
+         });
+
+        var extent1 = ol.proj.transform([35.4, 54.24], 'EPSG:4326', 'EPSG:3857');
+        var extent2 = ol.proj.transform([40, 59.9], 'EPSG:4326', 'EPSG:3857');
+        var extent = [extent1[0], extent1[1], extent2[0], extent2[1]];
+        var imageLayerBlend = new ol.layer.Image({
+            source: new ol.source.ImageStatic({
+                url: 'blend1.jpg',
+                imageExtent: extent, 
+            }),
+            opacity: 0.5
+         });
+
+        var map = new ol.Map({
+            target: 'map',
+            layers: [
+                osmLayer,
+                //imageLayerBlend
+                imageLayerNN,
+                //imageLayerNNaz
+                imageLayerK
+            ],
+//            view: new ol.View({
+//                center: ol.extent.getCenter(extent),
+//                zoom: 2,
+//                projection: projection
+//            })            
+        view: new ol.View({
+          //center: ol.proj.transform([43+55/60, 56+18/60], 'EPSG:4326', 'EPSG:3857'),
+          center: [4895650.867513087, 7617122.422797349],
+          zoom: 8
+        })
+        });
+    </script>
+  </body>
+</html>

@@ -1,3 +1,5 @@
+// (c) Petr Kalinin, https://github.com/petr-kalinin/radarmap, GNU AGPL
+
 var map;
 var layers = {};
 var timeout;
@@ -20,12 +22,12 @@ function init() {
             //url: 'http://ingreelab.net/C04AF0B62BEC112E8D7242FB848631D12D252728/{z}/{x}/{y}.png',
             url: 'tiles.php?z={z}&x={x}&y={y}',
             attributions: [
-                new ol.Attribution({ html: ['Данные карты &copy; участники <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, ODbL; изображения &copy; <a href="http://чепецк.net">Чепецк.net</a>'] }),
+                new ol.Attribution({ html: ['Данные карты &copy; участники <a href="http://www.openstreetmap.org/">OpenStreetMap</a>, <a href="http://www.openstreetmap.org/copyright">ODbL</a>; изображения &copy; <a href="http://чепецк.net">Чепецк.net</a>'] }),
                 new ol.Attribution({
                     html: 'Данные с радаров &copy; <a href="http://meteorad.ru/">ФГБУ «ЦАО» Росгидромета, НТЦР ДМРЛ</a>'
                 }),
                 new ol.Attribution({
-                    html: 'Сборка всего на одну карту &copy; <a href="mailto:petr@kalinin.nnov.ru">Петр Калинин</a>, <a href="http://www.gnu.org/licenses/agpl-3.0.en.html">AGPL</a>'
+                    html: 'Сборка всего на одну карту &copy; <a href="mailto:petr@kalinin.nnov.ru">Петр Калинин</a>, <a href="http://www.gnu.org/licenses/agpl-3.0.en.html">GNU AGPL</a>, <a href="https://github.com/petr-kalinin/radarmap">github.com/petr-kalinin/radarmap</a>'
                 })
             ]
         })
@@ -64,7 +66,7 @@ function imageUrl(layerId, fname) {
 
 function setLayerSource(layerId, fname) {
     var url = imageUrl(layerId, fname)
-    console.log("Set layer source " + layerId + " to " + fname)
+    //console.log("Set layer source " + layerId + " to " + fname)
     var extent = data[layerId]["corners"];
     var source = new ol.source.ImageStatic({
                 url: url,
@@ -107,7 +109,7 @@ function parseTimeFromNow(timeStr) {
     var h = timeStr[9] + timeStr[10];
     var min = timeStr[11] + timeStr[12];
     var date = new Date(y,m,d,h,min,0,0);
-    var now = new Date();
+    var now = new Date(2015,09,25,20,0,0,0);
     var diff = Math.floor((now-date)/60/1000) + now.getTimezoneOffset();
     return diff;
 }
@@ -162,19 +164,29 @@ function waitForHistory() {
 
 function playHistory() {
     clearTimeout(timeout);
+    document.getElementById("playbackButton").disabled = true;
     frameHistory = prepareHistory();
     currentFrame = 0
     setTimeout(waitForHistory, 500)
 }
 
+function makeTime(delta) {
+    var time = new Date(new Date() - delta * 60 * 1000);
+    var min = time.getMinutes();
+    var hr = time.getHours();
+    min = ((min < 10)? ("0" + min) : ("" + min))
+    hr = ((hr < 10)? ("0" + hr) : ("" + hr))
+    return hr + ":" + min + " (" + delta + " минут назад)";
+}
+
 function stepFrame() {
     if (currentFrame >= frameHistory.length) {
-        document.getElementById("timeFrame").innerHTML = "";
+        document.getElementById("timeFrame").innerHTML = "История: ";
+        document.getElementById("playbackButton").disabled = false;
         reload();
         return;
     }
-    console.log(currentFrame)
-    document.getElementById("timeFrame").innerHTML = (6*60 - currentFrame * 10) + " минут назад";
+    document.getElementById("timeFrame").innerHTML = makeTime(6*60 - currentFrame * 10);
     for (var id in frameHistory[currentFrame])
         if (frameHistory[currentFrame].hasOwnProperty(id)) 
             setLayerSource(id, frameHistory[currentFrame][id])

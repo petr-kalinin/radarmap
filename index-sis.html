@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- (c) Petr Kalinin, https://github.com/petr-kalinin/radarmap, GNU AGPL -->
 <html lang="en">
   <head>
     <meta charset="UTF-8">
@@ -49,8 +50,36 @@
     <div id="map"></div>
     <div id="legend"><img src="legend.png"/></div>
     <div id="playback">
-        <div id="timeFrame"></div>
-        <button type="button" onclick="playHistory()" title="Проиграть историю">&gt;&gt;</button>
+        <div id="timeFrame">История: </div>
+        <button type="button" onclick="playHistory()" title="Проиграть историю" id="playbackButton">&#9658;</button>
     </div>
   </body>
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript">
+        (function (d, w, c) {
+            (w[c] = w[c] || []).push(function() {
+                try {
+                    w.yaCounter31539208 = new Ya.Metrika({
+                        id:31539208,
+                        clickmap:true,
+                        trackLinks:true,
+                        accurateTrackBounce:true
+                    });
+                } catch(e) { }
+            });
+
+            var n = d.getElementsByTagName("script")[0],
+                s = d.createElement("script"),
+                f = function () { n.parentNode.insertBefore(s, n); };
+            s.type = "text/javascript";
+            s.async = true;
+            s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+            if (w.opera == "[object Opera]") {
+                d.addEventListener("DOMContentLoaded", f, false);
+            } else { f(); }
+        })(document, window, "yandex_metrika_callbacks");
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/31539208" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
 </html>
