@@ -9,6 +9,7 @@ import datetime
 import subprocess
 import json
 import re
+import time
 
 files = [
          ('RUDN', 'Nizhny', '43.97798', '56.296179'),
